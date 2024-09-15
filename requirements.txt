@@ -1,0 +1,4 @@
+# "local" setup as we build out our functions, not exactly DRY right now but we ar crawl/walk/run
+pandas
+requests
+google-cloud-bigquery
