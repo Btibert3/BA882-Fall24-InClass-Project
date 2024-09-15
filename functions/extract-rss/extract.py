@@ -120,7 +120,11 @@ def task(feeds=feeds, bucket_name=bucket_name):
     file_path = f"gs://{bucket_name}/{blob_name}"
 
     # TODO: are there some better practices around returning json over simple entries (a single string value)
-    print(file_path)
-    return file_path
+    results = {
+        'filepath': file_path,
+        'jobid': JOB_ID
+    }
+    print(results)
+    return results
 
     
