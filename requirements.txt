@@ -2,3 +2,5 @@
 pandas
 requests
 google-cloud-bigquery
+feedparser
+google-cloud-storage
