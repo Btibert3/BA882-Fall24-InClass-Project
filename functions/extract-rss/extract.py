@@ -122,7 +122,9 @@ def task(feeds=feeds, bucket_name=bucket_name):
     # TODO: are there some better practices around returning json over simple entries (a single string value)
     results = {
         'filepath': file_path,
-        'jobid': JOB_ID
+        'jobid': JOB_ID,
+        'bucket_id': bucket_name,
+        'blob_name': blob_name
     }
     print(results)
     return results
