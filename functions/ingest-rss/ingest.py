@@ -8,7 +8,6 @@ import datetime
 from google.cloud import storage, bigquery
 import json 
 from io import BytesIO
-import functions_framework
 
 # format string to convert published date to a timestamp
 format_str = "%a, %d %b %Y %H:%M:%S %z"

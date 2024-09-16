@@ -2,4 +2,5 @@ requests
 feedparser
 pandas
 google-cloud-storage
+google-cloud-bigquery
 functions-framework==3.*
