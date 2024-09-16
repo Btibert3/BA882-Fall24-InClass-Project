@@ -6,7 +6,7 @@ from google.cloud import bigquery
 
 def main(request):
     # Initialize BigQuery client
-    client = bigquery.Client()
+    bq_client = bigquery.Client()
 
     # Define dataset and table names
     dataset_id = 'aws_blogs'
@@ -23,7 +23,7 @@ def main(request):
 
     # Execute the SQL to create the dataset
     try:
-        client.query(create_dataset_sql).result()
+        bq_client.query(create_dataset_sql).result()
         print(f"Dataset {dataset_id} exists or created successfully.")
     except Exception as e:
         print(f"Error creating dataset {dataset_id}: {e}", 500)
@@ -35,7 +35,7 @@ def main(request):
     # response_body is json string, summary is from the feed, content is parsed out as EtLT
     create_table_sql = f"""
     CREATE TABLE IF NOT EXISTS `{project_id}.{dataset_id}.{table_id}` (
-        id STRING NOT NULL,
+        id STRING,
         url STRING,
         title STRING,
         published_date TIMESTAMP,
