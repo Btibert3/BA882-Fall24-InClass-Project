@@ -4,3 +4,4 @@ requests
 google-cloud-bigquery
 feedparser
 google-cloud-storage
+functions-framework==3.*

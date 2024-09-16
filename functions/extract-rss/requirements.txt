@@ -2,3 +2,4 @@ requests
 feedparser
 pandas
 google-cloud-storage
+functions-framework==3.*
