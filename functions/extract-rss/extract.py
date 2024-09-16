@@ -39,7 +39,7 @@ feeds = [
 
 ######################################################### the job task
 
-def task(feeds=feeds, bucket_name=bucket_name):
+def main(feeds=feeds, bucket_name=bucket_name):
     """
     Extract the latest from the RSS feeds and store in GCS
     """
