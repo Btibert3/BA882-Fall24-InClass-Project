@@ -2,9 +2,9 @@
 # NOTE: I set my Service Account as GOOGLE_APPLICATION_CREDENTIALS in .bash_rc to mimic local and deployed code (set in the background via SA we define)
 
 from google.cloud import bigquery
-import logging
 
-def ensure_schema_and_table(request):
+
+def main(request):
     # Initialize BigQuery client
     client = bigquery.Client()
 
@@ -24,9 +24,8 @@ def ensure_schema_and_table(request):
     # Execute the SQL to create the dataset
     try:
         client.query(create_dataset_sql).result()
-        logging.info(f"Dataset {dataset_id} exists or created successfully.")
+        print(f"Dataset {dataset_id} exists or created successfully.")
     except Exception as e:
-        logging.error(f"Error creating dataset {dataset_id}: {e}")
         print(f"Error creating dataset {dataset_id}: {e}", 500)
 
 
@@ -42,16 +41,16 @@ def ensure_schema_and_table(request):
         published_date TIMESTAMP,
         content STRING,
         summary STRING,
-        response_body JSON
+        response_body JSON,
+        ingest_timestamp TIMESTAMP
     )
     """
 
     # Execute the SQL to create the table
     try:
         client.query(create_table_sql).result()
-        logging.info(f"Table {table_id} in dataset {dataset_id} exists or created successfully.")
+        print(f"Table {table_id} in dataset {dataset_id} exists or created successfully.")
     except Exception as e:
-        logging.error(f"Error creating table {table_id} in dataset {dataset_id}: {e}")
         print(f"Error creating table {table_id} in dataset {dataset_id}: {e}", 500)
 
     # output of the function, could be way more verbose or handy
