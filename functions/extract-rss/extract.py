@@ -101,7 +101,7 @@ def task(feeds=feeds, bucket_name=bucket_name):
     JOB_ID = datetime.datetime.now().strftime("%Y%m%d%H%M") + "-" + str(uuid.uuid4())
 
     # write the deduped JSON to GCS
-    blob_name = f"rss/{JOB_ID}.json"
+    blob_name = f"rss/{JOB_ID}/raw.json"
 
     # Save each JSON object on a new line in a file in memory
     json_buffer = BytesIO()
@@ -113,6 +113,7 @@ def task(feeds=feeds, bucket_name=bucket_name):
     bucket = storage_client.bucket(bucket_name)
     blob = bucket.blob(blob_name)
     blob.upload_from_file(json_buffer, content_type="application/json")
+
 
     ######################################################### return the file to load
 
