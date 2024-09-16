@@ -8,19 +8,14 @@ import datetime
 from google.cloud import storage, bigquery
 import json 
 from io import BytesIO
+import functions_framework
 
 # format string to convert published date to a timestamp
 format_str = "%a, %d %b %Y %H:%M:%S %z"
 
+################################################### the task
 
-# the GCP CLoud run function which will assume a json object as the event/input
-
-#"""
-# {'filepath': 'gs://btibert882_24_sandbox/rss/202409161754-b9de0395-d03f-48c1-aa19-1a108ba8cf9d.json', 'jobid': '202409161754-b9de0395-d03f-48c1-aa19-1a108ba8cf9d', 'bucket_id': 'btibert882_24_sandbox', 'blob_name': 'rss/202409161754-b9de0395-d03f-48c1-aa19-1a108ba8cf9d.json'}
-#"""
-
-############################## the function
-
+@functions_framework.http
 def main(request):
 
     storage_client = storage.Client()

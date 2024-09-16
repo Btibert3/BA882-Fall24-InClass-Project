@@ -11,6 +11,9 @@ import uuid
 from google.cloud import storage, bigquery
 import json 
 from io import BytesIO
+import functions_framework
+
+
 
 
 ############################################## setup
@@ -39,6 +42,7 @@ feeds = [
 
 ######################################################### the job task
 
+@functions_framework.http
 def main(feeds=feeds, bucket_name=bucket_name):
     """
     Extract the latest from the RSS feeds and store in GCS

@@ -2,8 +2,9 @@
 # NOTE: I set my Service Account as GOOGLE_APPLICATION_CREDENTIALS in .bash_rc to mimic local and deployed code (set in the background via SA we define)
 
 from google.cloud import bigquery
+import functions_framework
 
-
+@functions_framework.http
 def main(request):
     # Initialize BigQuery client
     bq_client = bigquery.Client()
