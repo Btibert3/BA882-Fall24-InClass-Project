@@ -41,9 +41,9 @@ def main(request):
         published_date TIMESTAMP,
         content STRING,
         summary STRING,
-        response_body JSON,
         ingest_timestamp TIMESTAMP,
-        job_id STRING
+        job_id STRING,
+        raw_feed STRING
     )
     """
 
