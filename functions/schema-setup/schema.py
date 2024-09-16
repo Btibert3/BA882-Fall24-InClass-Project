@@ -42,7 +42,8 @@ def main(request):
         content STRING,
         summary STRING,
         response_body JSON,
-        ingest_timestamp TIMESTAMP
+        ingest_timestamp TIMESTAMP,
+        job_id STRING
     )
     """
 
