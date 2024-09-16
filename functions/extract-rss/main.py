@@ -43,7 +43,7 @@ feeds = [
 ######################################################### the job task
 
 @functions_framework.http
-def main(feeds=feeds, bucket_name=bucket_name):
+def main(request):
     """
     Extract the latest from the RSS feeds and store in GCS
     """
