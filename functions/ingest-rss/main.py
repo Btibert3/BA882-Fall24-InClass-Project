@@ -71,10 +71,11 @@ def main(request):
 
     # create a tmp copy of raw_posts for the job ingestion
     dataset_id = "aws_blogs"  #ideally passed in from the prev step or env variable
-    table_id = "raw_post" #ideally passed in from the prev step or env variable
-    tmp_table = f"{dataset_id}.tmp_post_{job_id}"
+    table_id = "post" #ideally passed in from the prev step or env variable
+    tmp_table = f"{dataset_id}.raw_post"
     create_dataset_sql = f"""
-    CREATE TABLE `{tmp_table}` LIKE `{dataset_id}.{table_id}`
+    DROP TABLE IF EXISTS `{tmp_table}`;
+    CREATE TABLE `{tmp_table}` LIKE `{dataset_id}`.`{table_id}`;
     """
 
     # Execute the SQL to create the dataset
@@ -94,7 +95,7 @@ def main(request):
     )
     
     gcs_uri = f"gs://{bucket_id}/{blob_name}"
-    destination = f"{dataset_id}.tmp_post_{job_id}"  # without the ticks
+    destination = f"{tmp_table}"  
 
     try:
         load_job = bq_client.load_table_from_uri(
@@ -107,43 +108,6 @@ def main(request):
         print(f"Error loading the extracted data into {destination}: {e}", 500)
         raise
 
-
-    ############################################################### write the new records into the raw table
-
-    delta_sql = f"""
-    INSERT INTO `{dataset_id}.{table_id}`
-    SELECT tmp.* 
-    FROM `{tmp_table}` AS tmp
-    LEFT JOIN `{dataset_id}.{table_id}` AS raw
-    ON tmp.id = raw.id
-    WHERE raw.id IS NULL;
-    """
-
-    #Execute the SQL to import the new records found
-    try:
-        query_job = bq_client.query(delta_sql)
-        query_job.result()
-        print(f"The record deltas were successfully evaluated")
-    except Exception as e:
-        print(f"Error evaluating the records: {e}", 500)
-        raise
-
-
-    ############################################################### cleanup the tmp table
-    ## BQ has a limit, we may not hit it, but I tend to clean up these tmp tables
-
-    cleanup_sql = f"""
-    DROP TABLE `{destination}`;
-    """
-
-    # Execute the SQL to import the new records found
-    try:
-        bq_client.query(cleanup_sql).result()
-        print(f"The tmp table {destination} was dropped")
-    except Exception as e:
-        print(f"Error dropping the table: {e}", 500)
-        raise
-    
     
     return {'statusCode':200}
 
