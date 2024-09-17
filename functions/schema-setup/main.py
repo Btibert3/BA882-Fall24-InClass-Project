@@ -11,7 +11,6 @@ def main(request):
 
     # Define dataset and table names
     dataset_id = 'aws_blogs'
-    table_id = 'raw_post'
     project_id = bq_client.project
 
 
@@ -34,6 +33,7 @@ def main(request):
 
     # SQL to create table if it does not exist
     # response_body is json string, summary is from the feed, content is parsed out as EtLT
+    table_id = "post"
     create_table_sql = f"""
     CREATE TABLE IF NOT EXISTS `{project_id}.{dataset_id}.{table_id}` (
         id STRING,
@@ -54,6 +54,11 @@ def main(request):
         print(f"Table {table_id} in dataset {dataset_id} exists or created successfully.")
     except Exception as e:
         print(f"Error creating table {table_id} in dataset {dataset_id}: {e}", 500)
+
+
+
+
+    ############################################################ FINISH
 
     # output of the function, could be way more verbose or handy
     return {'statusCode':200}
