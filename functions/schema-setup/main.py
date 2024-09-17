@@ -12,7 +12,7 @@ def main(request):
     # Define dataset and table names
     dataset_id = 'aws_blogs'
     table_id = 'raw_post'
-    project_id = client.project
+    project_id = bq_client.project
 
 
     ############################################################ SCHEMA
@@ -50,7 +50,7 @@ def main(request):
 
     # Execute the SQL to create the table
     try:
-        client.query(create_table_sql).result()
+        bq_client.query(create_table_sql).result()
         print(f"Table {table_id} in dataset {dataset_id} exists or created successfully.")
     except Exception as e:
         print(f"Error creating table {table_id} in dataset {dataset_id}: {e}", 500)
