@@ -110,39 +110,98 @@ def main(request):
 
     ############################################################### write the new records into the raw table
 
-    delta_sql = f"""
-    INSERT INTO `{dataset_id}.{table_id}`
-    SELECT tmp.* 
-    FROM `{tmp_table}` AS tmp
-    LEFT JOIN `{dataset_id}.{table_id}` AS raw
-    ON tmp.id = raw.id
-    WHERE raw.id IS NULL;
-    """
+    # delta_sql = f"""
+    # INSERT INTO `{dataset_id}.{table_id}`
+    # SELECT tmp.* 
+    # FROM `{tmp_table}` AS tmp
+    # LEFT JOIN `{dataset_id}.{table_id}` AS raw
+    # ON tmp.id = raw.id
+    # WHERE raw.id IS NULL;
+    # """
+    # delta_sql = """
+    # INSERT INTO `aws_blogs.raw_post` (id, url, title, published_date, content, summary, ingest_timestamp, job_id, raw_feed)
+    # SELECT tmp.id, tmp.url, tmp.title, tmp.published_date, tmp.content, tmp.summary, tmp.ingest_timestamp, tmp.job_id, tmp.raw_feed
+    # FROM `aws_blogs.tmp_post_202409171448-0bbe3e29-b4da-486c-9e66-6e07d830b882` AS tmp
+    # LEFT JOIN `aws_blogs.raw_post` AS raw
+    # ON tmp.id = raw.id
+    # WHERE raw.id IS NULL;
+    # """
+    # print(f"the query to move the changed records: {delta_sql}")
+
+    # query = "SELECT 1 AS test"
+    # try:
+    #     query_job = bq_client.query(query)
+    #     result = query_job.result()
+    #     print("Test query executed successfully:", list(result))
+    # except Exception as e:
+    #     print(f"Error executing test query: {e}")
+    #     raise
 
     #Execute the SQL to import the new records found
-    try:
-        query_job = bq_client.query(delta_sql)
-        query_job.result()
-        print(f"The record deltas were successfully evaluated")
-    except Exception as e:
-        print(f"Error evaluating the records: {e}", 500)
-        raise
+    # try:
+    #     query_job = bq_client.query(delta_sql)
+    #     query_job.result()
+    #     print(f"The record deltas were successfully evaluated")
+    # except Exception as e:
+    #     print(f"Error evaluating the records: {e}", 500)
+    #     raise
+
+    # source_table_id = f"{tmp_table}"  
+    # destination_table_id = f"{dataset_id}.{table_id}"
+
+    # # Configure the job
+    # job_config = bigquery.CopyJobConfig()
+    # job_config.write_disposition = bigquery.WriteDisposition.WRITE_APPEND 
+
+    # # Perform the CopyJob
+    # try:
+    #     copy_job = bq_client.copy_table(
+    #         sources=source_table_id,
+    #         destination=destination_table_id,
+    #         job_config=job_config
+    #     )
+    #     copy_job.result()  # Waits for the job to complete
+        
+    #     print(f"Copy job completed successfully. Data moved from {source_table_id} to {destination_table_id}.")
+    #     print(f"Job details: {copy_job.job_id}")
+    # except Exception as e:
+    #     print(f"Error during the CopyJob: {e}")
+    #     raise
+
+    # source_table_id = f"{tmp_table}"  
+    # destination_table_id = f"{dataset_id}.{table_id}"
+    # source_data = pandas_gbq.read_gbq(f"SELECT * FROM `{source_table_id}`", progress_bar_type=None)
+    # destination_ids = pandas_gbq.read_gbq(f"SELECT id FROM `{destination_table_id}`", progress_bar_type=None)
+
+    # # look for the deltas
+    # deltas = source_data[~source_data['id'].isin(destination_ids['id'])]
+
+    # # write as json lines to GCS
+    # json_buffer = BytesIO()
+    # for record in deltas.to_dict(orient='records'):
+    #     json_buffer.write((json.dumps(record) + "\n").encode('utf-8'))
+    # json_buffer.seek(0)
+
+    # blob_name = f"rss/{job_id}/deltas.jsonl"
+    # blob = bucket.blob(blob_name)
+    # blob.upload_from_file(json_buffer, content_type="application/json")
+    # print(f"JSONL file uploaded to gs://{bucket_id}/{blob_name}")
 
 
     ############################################################### cleanup the tmp table
     ## BQ has a limit, we may not hit it, but I tend to clean up these tmp tables
 
-    cleanup_sql = f"""
-    DROP TABLE `{destination}`;
-    """
+    # cleanup_sql = f"""
+    # DROP TABLE `{destination}`;
+    # """
 
-    # Execute the SQL to import the new records found
-    try:
-        bq_client.query(cleanup_sql).result()
-        print(f"The tmp table {destination} was dropped")
-    except Exception as e:
-        print(f"Error dropping the table: {e}", 500)
-        raise
+    # # Execute the SQL to import the new records found
+    # try:
+    #     bq_client.query(cleanup_sql).result()
+    #     print(f"The tmp table {destination} was dropped")
+    # except Exception as e:
+    #     print(f"Error dropping the table: {e}", 500)
+    #     raise
     
     
     return {'statusCode':200}
