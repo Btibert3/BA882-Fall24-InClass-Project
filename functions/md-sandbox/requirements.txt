@@ -1,0 +1,6 @@
+import pandas as pd
+functions-framework==3.*
+google-cloud-storage
+google-cloud-secret-manager
+duckdb==1.1.0
+feedparser
