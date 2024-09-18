@@ -161,3 +161,31 @@ md.execute(f"CREATE TABLE {db_schema}.rss_feed_tmp AS FROM {db_schema}.rss_feed 
 
 # copy into
 md.execute(f"INSERT INTO {db_schema}.rss_feed_tmp SELECT * from {db_schema}.rss_feed;")
+
+
+################################################## PK Test Sandbox
+
+md = duckdb.connect(f'md:?motherduck_token={md_token}') 
+
+schema_name = 'example_schema'
+md.execute(f"CREATE SCHEMA IF NOT EXISTS {schema_name};")
+
+table_name = 'users'
+md.execute(f"""
+    CREATE TABLE IF NOT EXISTS {schema_name}.{table_name} (
+        user_id INTEGER PRIMARY KEY,  -- Primary Key
+        username VARCHAR,
+        email VARCHAR
+    );
+""")
+
+# Step 4: Add initial data to the table
+initial_data = [
+    (1, 'Alice', 'alice@example.com'),
+    (2, 'Bob', 'bob@example.com'),
+    (3, 'Charlie', 'charlie@example.com')
+]
+
+# Insert the initial data into the table
+md.executemany(f"INSERT INTO {schema_name}.{table_name} (user_id, username, email) VALUES (?, ?, ?);", initial_data)
+
