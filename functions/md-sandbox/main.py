@@ -49,18 +49,55 @@ db_schema = f"{db}.{schema}"
 
 md.sql(f"CREATE SCHEMA IF NOT EXISTS {db_schema};")
 
+md.sql(f"SHOW TABLES;").show()
+
 
 # create some tables in the database, not not using, just naming convention
 # https://duckdb.org/docs/sql/statements/create_table.html
+tbl_name = "users"
 table_create_sql = f"""
-CREATE TABLE IF NOT EXISTS {db_schema}.users  (
+CREATE TABLE IF NOT EXISTS {db_schema}.{tbl_name}  (
     user_id INTEGER PRIMARY KEY,  -- Primary key
     username VARCHAR,             -- Username field
     email VARCHAR,                -- Email field
     created_at TIMESTAMP          -- Timestamp when the user was created
 );
 """
+
 md.sql(table_create_sql)
+
+md.sql(f"DESCRIBE {db_schema}.{tbl_name};").show()
+
+
+import pandas as pd
+from datetime import datetime
+import random
+
+# Sample data for the table
+data = {
+    'user_id': range(1, 6),  # User IDs
+    'username': ['alice', 'bob', 'charlie', 'david', 'eve'],  # Usernames
+    'email': [
+        'alice@example.com',
+        'bob@example.com',
+        'charlie@example.com',
+        'david@example.com',
+        'eve@example.com'
+    ],  # Email addresses
+    'created_at': [
+        datetime(2023, 1, random.randint(1, 28)),
+        datetime(2023, 2, random.randint(1, 28)),
+        datetime(2023, 3, random.randint(1, 28)),
+        datetime(2023, 4, random.randint(1, 28)),
+        datetime(2023, 5, random.randint(1, 28)),
+    ]  # Timestamps for user creation
+}
+
+df = pd.DataFrame(data)
+
+# Insert the pandas DataFrame data into the DuckDB table
+md.execute(f"INSERT INTO {db_schema}.{tbl_name} SELECT * FROM df;")
+
 
 ####### uses main schema, I didnt create one nor use, ok for now
 ### main schema
