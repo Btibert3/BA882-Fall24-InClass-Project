@@ -3,6 +3,7 @@
 # imports
 import functions_framework
 from google.cloud import secretmanager
+from google.cloud import storage
 import duckdb
 import feedparser
 import pandas as pd
@@ -169,5 +170,11 @@ def main(request):
     CREATE TABLE {db_schema}.{tbl_raw} as SELECT * FROM tags_df
     """
     md.sql(raw_insert)
+
+
+
+    ######################################################## return
+
+    return {'statusCode': 200}
 
 
