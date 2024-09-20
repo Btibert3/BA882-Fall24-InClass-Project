@@ -10,6 +10,8 @@ import pandas as pd
 import requests
 import datetime
 import uuid
+import json 
+from io import BytesIO
 
 @functions_framework.http
 def main(request):
@@ -23,6 +25,16 @@ def main(request):
     secret_id = 'mother_duck'   #<---------- this is the name of the secret your created above!
     version_id = 'latest'
     bucket_name = "btibert882_24_sandbox"
+    JOB_ID = datetime.datetime.now().strftime("%Y%m%d%H%M") + "-" + str(uuid.uuid4())
+
+    # setup the bucket
+    bucket = storage_client.bucket(bucket_name)
+
+    # some setup that we will use for this task (db and schema names)
+    # ideally schema comes in from environment variable but ok for now
+    db = 'sandbox'
+    schema = "dev"
+    db_schema = f"{db}.{schema}"
 
     # Build the resource name of the secret version
     name = f"projects/{project_id}/secrets/{secret_id}/versions/{version_id}"
@@ -38,13 +50,7 @@ def main(request):
     print(md.sql("SHOW DATABASES").show())
 
 
-
-    ######################################################## create the sandbox
-
-    # some setup that we will use for this task (db and schema names)
-    db = 'sandbox'
-    schema = "dev"
-    db_schema = f"{db}.{schema}"
+    ######################################################## create the schema for the raw tables
 
     # define the DDL statement with an f string
     create_db_sql = f"CREATE DATABASE IF NOT EXISTS {db};"  
@@ -93,13 +99,7 @@ def main(request):
     for feed in feed_list:
         entries.extend(feed.entries)
 
-    # list of dictionaries as we are just being methodical step by step
-    # entry_data = []
-    # for entry in entries:
-    #     entry_data.append(dict(entry))
-
     entries_parsed = []
-    job_id = datetime.datetime.now().strftime("%Y%m%d%H%M") + "-" + str(uuid.uuid4())
     for entry in entries:
         pe = dict(
             id = entry.id,
@@ -110,18 +110,23 @@ def main(request):
             post_source = entry.content[0].get('value'),
             # published_timestamp = datetime.datetime.strptime(entry.published, "%a, %d %b %Y %H:%M:%S %z").isoformat(),
             published_timestamp = entry.published,
-            job_id = job_id,
+            job_id = JOB_ID,
         )
         entries_parsed.append(pe)
 
 
+
     # convert to a dataframe
     edf = pd.DataFrame(entries_parsed)
-
     print(f"converted the entries to a dataframe of shape: {edf.shape}")
 
+    # write to gcs
+    blob_name = f"rss/{JOB_ID}/extracted_entries.csv"
+    blob = bucket.blob(blob_name)
+    blob.upload_from_string(edf.to_csv(index=False), 'text/csv')
 
-    ######################################################## create a raw table to hold
+
+    ######################################################## create a raw table to hold the extracted posts
 
     # cleanup the raw table, this is new for every job
     tbl_raw = "raw_posts"
@@ -171,7 +176,10 @@ def main(request):
     """
     md.sql(raw_insert)
 
-
+    # write to gcs
+    blob_name = f"rss/{JOB_ID}/extracted_tags.csv"
+    blob = bucket.blob(blob_name)
+    blob.upload_from_string(tags_df.to_csv(index=False), 'text/csv')
 
     ######################################################## return
 
