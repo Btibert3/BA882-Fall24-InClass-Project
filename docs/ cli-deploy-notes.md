@@ -22,14 +22,15 @@ gcloud services enable bigquery.googleapis.com
 
 
 ```
-gcloud functions deploy ingest-rss \
+gcloud functions deploy md-extract \
     --gen2 \
     --runtime python311 \
     --trigger-http \
     --entry-point main \
-    --source ./functions/ingest-rss \
+    --source ./functions/md-extract \
     --stage-bucket btibert-ba882-fall24-functions \
     --service-account etl-pipeline@btibert-ba882-fall24.iam.gserviceaccount.com \
     --region us-central1 \
-    --allow-unauthenticated
+    --allow-unauthenticated \
+    --memory 512MB 
 ```
