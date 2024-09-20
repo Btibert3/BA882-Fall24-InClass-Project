@@ -7,14 +7,17 @@ import feedparser
 import pandas as pd
 import requests
 import datetime
+import uuid
 
-# instantiate the service
+# instantiate the services 
 sm = secretmanager.SecretManagerServiceClient()
+storage_client = storage.Client()
 
 # replace below with your own product settings
 project_id = 'btibert-ba882-fall24'
 secret_id = 'mother_duck'   #<---------- this is the name of the secret your created above!
 version_id = 'latest'
+bucket_name = "btibert882_24_sandbox"
 
 # Build the resource name of the secret version
 name = f"projects/{project_id}/secrets/{secret_id}/versions/{version_id}"
@@ -75,24 +78,40 @@ for feed in feeds:
     except Exception as e:
         print(e)
 
+######################################################## light parsing of the feeds
+
 # flatten all the entries
 entries = []
 for feed in feed_list:
     entries.extend(feed.entries)
 
 # list of dictionaries as we are just being methodical step by step
-entry_data = []
+# entry_data = []
+# for entry in entries:
+#     entry_data.append(dict(entry))
+
+entries_parsed = []
+job_id = datetime.datetime.now().strftime("%Y%m%d%H%M") + "-" + str(uuid.uuid4())
 for entry in entries:
-    entry_data.append(dict(entry))
+    pe = dict(
+        id = entry.id,
+        title = entry.title,
+        link = entry.link,
+        summary = entry.summary,
+        tags = entry.tags,
+        post_source = entry.content[0].get('value'),
+        # published_timestamp = datetime.datetime.strptime(entry.published, "%a, %d %b %Y %H:%M:%S %z").isoformat(),
+        published_timestamp = entry.published,
+        job_id = job_id,
+    )
+    entries_parsed.append(pe)
 
 
-######################################################## ensure no dupes
+# helper function to process the parsed_timestamp
 
-# the entries from the feeds
-entries = pd.DataFrame(entry_data)
 
-# drop dupes here
-entries_nodupes = entries.drop_duplicates(subset=['link'])
+# convert to a dataframe
+edf = pd.DataFrame(entries_parsed)
 
 
 ######################################################## create a raw table to hold
@@ -104,13 +123,42 @@ DROP TABLE IF EXISTS {db_schema}.{tbl_raw}
 """
 md.sql(raw_table_cleanup)
 
-# insert directly into the raw table
 
+# insert the data
+edf['published_timestamp'] = pd.to_datetime(edf['published_timestamp'], utc=True).dt.tz_localize(None)
+edf['ingest_timestamp'] = pd.Timestamp.now()
 raw_insert = f"""
-CREATE TABLE {db_schema}.{tbl_raw} as SELECT * from entries_nodupes
+CREATE TABLE {db_schema}.{tbl_raw} as SELECT * from edf
 """
-entries_nodupes['ingest_timestamp'] = pd.Timestamp.now()
 md.sql(raw_insert)
 
 
-## do some light parsing before above
+######################################################## parse tags into motherduck
+
+# iterrows is not ideal, but with a job getting about 160 entries in a dataframe, this isnt bad
+rows = []
+for _, row in edf.iterrows():
+    for entry in row['tags']:
+        new_row = entry.copy()  # Copy the dictionary
+        new_row['id'] = row['id']  # Retain the original id
+        new_row['job_id'] = row['job_id']  # Retain the original jobid
+        rows.append(new_row)
+tags_df = pd.DataFrame(rows)
+
+
+# cleanup the raw table, this is new for every job
+tbl_raw = "raw_tags"
+raw_table_cleanup= f"""
+DROP TABLE IF EXISTS {db_schema}.{tbl_raw}
+"""
+md.sql(raw_table_cleanup)
+
+
+# insert the data
+tags_df['ingest_timestamp'] = pd.Timestamp.now()
+raw_insert = f"""
+CREATE TABLE {db_schema}.{tbl_raw} as SELECT * FROM tags_df
+"""
+md.sql(raw_insert)
+
+
