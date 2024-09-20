@@ -149,7 +149,7 @@ def main(request):
     for _, row in edf.iterrows():
         for entry in row['tags']:
             new_row = entry.copy()  # Copy the dictionary
-            new_row['id'] = row['id']  # Retain the original id
+            new_row['post_id'] = row['id']  # Retain the original id
             new_row['job_id'] = row['job_id']  # Retain the original jobid
             rows.append(new_row)
     tags_df = pd.DataFrame(rows)
