@@ -28,7 +28,7 @@ def upload_to_gcs(bucket_name, job_id, data):
     blob.upload_from_string(data)
     print(f"File {blob_name} uploaded to {bucket_name}.")
 
-    return f"gs://{bucket_name}/{blob_name}"
+    return {'bucket_name':bucket_name, 'blob_name': blob_name}
 
 
 ####################################################### core task
@@ -87,4 +87,9 @@ def task(request):
     # write to gcs
     gcs_path = upload_to_gcs(bucket_name, job_id, entries_json)
 
-    return {'gcs_path':gcs_path, 'num_entries': len(entries)}, 200
+    return {
+        'num_entries': len(entries), 
+        'job_id': job_id, 
+        'bucket_name':gcs_path.get('bucket_name'),
+        'blob_name': gcs_path.get('blob_name')
+    }, 200
