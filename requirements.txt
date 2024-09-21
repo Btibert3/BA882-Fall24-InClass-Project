@@ -6,3 +6,4 @@ feedparser
 google-cloud-storage
 functions-framework==3.*
 prefect
+prefect-gcp[all_extras]
