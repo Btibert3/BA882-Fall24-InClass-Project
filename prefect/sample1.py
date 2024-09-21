@@ -1,7 +1,7 @@
 import requests
 import json
 from prefect import flow, task
-from google.cloud import storage
+from google.cloud import storage. # not needed, we will use GCF and our other deploy to handle in the background
 
 # Task to call Google Cloud Function
 @task(retries=2)
