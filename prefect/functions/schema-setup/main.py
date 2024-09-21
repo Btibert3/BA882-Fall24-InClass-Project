@@ -2,16 +2,22 @@ import functions_framework
 from google.cloud import secretmanager
 import duckdb
 
+# settings
+project_id = 'btibert-ba882-fall24'
+secret_id = 'mother_duck'   #<---------- this is the name of the secret you created
+version_id = 'latest'
+
+# db setup
+db = 'awsblogs'
+schema = "stage"
+db_schema = f"{db}.{schema}"
+
+
 @functions_framework.http
-def main(request):
-    
+def task(request):
+
     # instantiate the services 
     sm = secretmanager.SecretManagerServiceClient()
-
-    # settings
-    project_id = 'btibert-ba882-fall24'
-    secret_id = 'mother_duck'   #<---------- this is the name of the secret your created above!
-    version_id = 'latest'
 
     # Build the resource name of the secret version
     name = f"projects/{project_id}/secrets/{secret_id}/versions/{version_id}"
@@ -24,11 +30,6 @@ def main(request):
     md = duckdb.connect(f'md:?motherduck_token={md_token}') 
 
     ##################################################### create the schema
-
-    # some setup that we will use for this task (db and schema names)
-    db = 'sandbox'
-    schema = "dev"
-    db_schema = f"{db}.{schema}"
 
     # define the DDL statement with an f string
     create_db_sql = f"CREATE DATABASE IF NOT EXISTS {db};"   
@@ -43,5 +44,7 @@ def main(request):
     md.sql(f"CREATE SCHEMA IF NOT EXISTS {db_schema};") 
 
     ##################################################### create the core tables
+
+    return {}, 200
 
     
