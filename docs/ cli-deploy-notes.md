@@ -17,17 +17,17 @@ gcloud services enable cloudbuild.googleapis.com
 gcloud services enable artifactregistry.googleapis.com
 gcloud services enable storage.googleapis.com
 gcloud services enable bigquery.googleapis.com
-
-
+gcloud services enable workflows.googleapis.com
+gcloud services enable cloudscheduler.googleapis.com
 
 
 ```
-gcloud functions deploy md-extract \
+gcloud functions deploy wf-entry \
     --gen2 \
     --runtime python311 \
     --trigger-http \
     --entry-point main \
-    --source ./functions/md-extract \
+    --source ./functions/wf-entry \
     --stage-bucket btibert-ba882-fall24-functions \
     --service-account etl-pipeline@btibert-ba882-fall24.iam.gserviceaccount.com \
     --region us-central1 \
