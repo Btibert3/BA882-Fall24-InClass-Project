@@ -1,0 +1,28 @@
+main:
+  params: [input]
+  steps:
+    - get_ids:  # Call the mapper function to retrieve the list of IDs
+        call: http.get
+        args:
+          url: "https://us-central1-btibert-ba882-fall24.cloudfunctions.net/wf-entry"
+        result: mapper_response
+
+    - check_ids:  # Extract the list of ID objects from the response
+        assign:
+          - ids: ${mapper_response.body.ids}  # Accessing the "ids" key in the response body
+
+    - process_each_id:  # Loop through each dictionary, and access the 'id' key
+        for:
+          value: item
+          in: ${ids}
+          steps:
+            - invoke_processor:
+                call: http.post
+                args:
+                  url: "https://us-central1-btibert-ba882-fall24.cloudfunctions.net/wf-mapper"
+                  body:
+                    id: ${item.id}  # Correctly accessing the 'id' key from each dictionary
+                result: processor_response
+
+    - done:
+        return: "Processing Complete"
