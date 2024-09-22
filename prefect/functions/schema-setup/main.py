@@ -43,7 +43,91 @@ def task(request):
     # create the schema
     md.sql(f"CREATE SCHEMA IF NOT EXISTS {db_schema};") 
 
-    ##################################################### create the core tables
+    ##################################################### create the core tables in stage
+
+    # posts
+    raw_tbl_name = f"{db_schema}.posts"
+    raw_tbl_sql = f"""
+    CREATE TABLE IF NOT EXISTS {raw_tbl_name} (
+        id VARCHAR PRIMARY KEY
+        ,link VARCHAR
+        ,title VARCHAR
+        ,summary VARCHAR
+        ,content_source VARCHAR
+        ,content_text VARCHAR
+        ,job_id VARCHAR
+        ,published TIMESTAMP 
+        ,ingest_timestamp TIMESTAMP
+    );
+    """
+    print(f"{raw_tbl_sql}")
+    md.sql(raw_tbl_sql)
+
+    # tags
+    raw_tbl_name = f"{db_schema}.tags"
+    raw_tbl_sql = f"""
+    CREATE TABLE IF NOT EXISTS {raw_tbl_name} (
+        term VARCHAR
+        ,post_id VARCHAR
+        ,job_id VARCHAR
+        ,ingest_timestamp TIMESTAMP 
+        ,PRIMARY KEY (term, post_id)
+    );
+    """
+    print(f"{raw_tbl_sql}")
+    md.sql(raw_tbl_sql)
+
+    # links
+    raw_tbl_name = f"{db_schema}.links"
+    raw_tbl_sql = f"""
+    CREATE TABLE IF NOT EXISTS {raw_tbl_name} (
+        post_id VARCHAR
+        ,index INT
+        ,href VARCHAR
+        ,title VARCHAR
+        ,ingest_timestamp TIMESTAMP 
+        ,job_id VARCHAR
+        ,PRIMARY KEY (post_id, index, href)
+    );
+    """
+    print(f"{raw_tbl_sql}")
+    md.sql(raw_tbl_sql)
+
+    # links
+    raw_tbl_name = f"{db_schema}.images"
+    raw_tbl_sql = f"""
+    CREATE TABLE IF NOT EXISTS {raw_tbl_name} (
+        post_id VARCHAR
+        ,index INT
+        ,src VARCHAR
+        ,width INT
+        ,height INT
+        ,ingest_timestamp TIMESTAMP 
+        ,job_id VARCHAR
+        ,PRIMARY KEY (post_id, index, src)
+    );
+    """
+    print(f"{raw_tbl_sql}")
+    md.sql(raw_tbl_sql)
+
+    # authors
+    raw_tbl_name = f"{db_schema}.authors"
+    raw_tbl_sql = f"""
+    CREATE TABLE IF NOT EXISTS {raw_tbl_name} (
+        post_id VARCHAR
+        ,index INT
+        ,name VARCHAR
+        ,image VARCHAR
+        ,bio VARCHAR
+        ,ingest_timestamp TIMESTAMP 
+        ,job_id VARCHAR
+        ,PRIMARY KEY (post_id, index, name)
+    );
+    """
+    print(f"{raw_tbl_sql}")
+    md.sql(raw_tbl_sql)
+
+
 
     return {}, 200
 
