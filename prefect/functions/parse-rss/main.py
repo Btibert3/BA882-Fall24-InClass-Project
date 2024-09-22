@@ -22,7 +22,7 @@ db_schema = f"{db}.{schema}"
 ingest_timestamp = pd.Timestamp.now()
 
 
-############################################## helpers
+############################################################### helpers
 
 def parse_published(date_str):
     dt_with_tz = datetime.datetime.strptime(date_str, '%a, %d %b %Y %H:%M:%S %z')
@@ -41,7 +41,22 @@ def extract_content_text(content):
     return cleaned_text
 
 
-############################################## main task
+def extract_image_data(html_content, post_id):
+    soup = BeautifulSoup(html_content, 'html.parser')
+    images = soup.find_all('img')
+    
+    for i,img in enumerate(images):
+        image_data = {
+            'post_id': post_id,
+            'index': i,
+            'src': img.get('src'),
+            'width': img.get('width'),
+            'height': img.get('height'),
+
+        }
+        image_info.append(image_data)
+
+############################################################### main task
 
 
 @functions_framework.http
@@ -51,7 +66,7 @@ def task(request):
     request_json = request.get_json(silent=True)
     print(f"request: {json.dumps(request_json)}")
 
-    # awful, but start with this
+    # TODO: DELETE THIS: awful, but start with this
     request_json = {
         "blob_name":"jobs/202409211821-b20feead-0dc0-431e-9f85-479e6ca8a33f/extracted_entries.json",
         "bucket_name":"btibert-ba882-fall24-awsblogs",
@@ -79,7 +94,7 @@ def task(request):
     create_schema = f"DROP SCHEMA IF EXISTS {db_schema} CASCADE; CREATE SCHEMA IF NOT EXISTS {db_schema};"
     md.sql(create_schema)
 
-    ########################### get the file that triggered this post
+    ############################################################### get the file that triggered this post
 
     # Access the 'id' from the incoming request
     bucket_name = request_json.get('bucket_name')
@@ -180,6 +195,36 @@ def task(request):
     # ingest
     md.sql(f"INSERT INTO {raw_tbl_name} SELECT * from posts_df")
     print(f"rows added to {raw_tbl_name}")
+
+
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ tbl: images
+    # NOTE: may not need a mapping table, just store the data repeated
+
+    # apply the function to each row in the DataFrame
+    image_info = []
+    for index, row in posts_df.iterrows():
+        extract_image_data(row['content_source'], row['id'])
+    
+    # flatten into a dataframe
+    images_df = pd.DataFrame(image_info)
+
+    # light cleanup - a handful may not have dimensions
+    images_df = images_df.dropna(subset="src")
+    images_df['width'] = pd.to_numeric(images_df['width'], errors='coerce')
+    images_df['height'] = pd.to_numeric(images_df['height'], errors='coerce')
+
+
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ tbl: embedded links
+
+
+    
+    
+
+
+
+
 
 
     ########################### return
