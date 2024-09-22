@@ -40,7 +40,7 @@ def extract_content_text(content):
     return cleaned_text
 
 
-def extract_image_data(html_content, post_id):
+def extract_image_data(html_content, post_id, image_info):
     soup = BeautifulSoup(html_content, 'html.parser')
     images = soup.find_all('img')
     
@@ -56,7 +56,7 @@ def extract_image_data(html_content, post_id):
         image_info.append(image_data)
 
 
-def extract_link_data(html_content, post_id):
+def extract_link_data(html_content, post_id, link_info):
     soup = BeautifulSoup(html_content, 'html.parser')
     links = soup.find_all('a')
     
@@ -71,7 +71,7 @@ def extract_link_data(html_content, post_id):
         link_info.append(link_data)
 
 
-def extract_authors_data(html_content, post_id):
+def extract_authors_data(html_content, post_id, authors_info):
     
     # Parse the HTML content
     soup = BeautifulSoup(html_content, 'html.parser')
@@ -113,12 +113,12 @@ def extract_authors_data(html_content, post_id):
 def task(request):
 
     # # TODO: DELETE THIS: awful, but start with this to help with testing
-    request_json = {
-        "blob_name":"jobs/202409211821-b20feead-0dc0-431e-9f85-479e6ca8a33f/extracted_entries.json",
-        "bucket_name":"btibert-ba882-fall24-awsblogs",
-        "job_id":"202409211821-b20feead-0dc0-431e-9f85-479e6ca8a33f",
-        "num_entries":160
-    }
+    # request_json = {
+    #     "blob_name":"jobs/202409211821-b20feead-0dc0-431e-9f85-479e6ca8a33f/extracted_entries.json",
+    #     "bucket_name":"btibert-ba882-fall24-awsblogs",
+    #     "job_id":"202409211821-b20feead-0dc0-431e-9f85-479e6ca8a33f",
+    #     "num_entries":160
+    # }
 
     # Parse the request data
     request_json = request.get_json(silent=True)
@@ -208,7 +208,7 @@ def task(request):
     # apply the function to each row in the DataFrame
     image_info = []
     for index, row in posts_df.iterrows():
-        extract_image_data(row['content_source'], row['id'])
+        extract_image_data(row['content_source'], row['id'], image_info)
     
     # flatten into a dataframe
     images_df = pd.DataFrame(image_info)
@@ -228,7 +228,7 @@ def task(request):
     # apply the function to each row in the DataFrame
     link_info = []
     for index, row in posts_df.iterrows():
-        extract_link_data(row['content_source'], row['id'])
+        extract_link_data(row['content_source'], row['id'], link_info)
     
     links_df = pd.DataFrame(link_info)
 
@@ -240,7 +240,7 @@ def task(request):
     
     authors_info = []
     for index, row in posts_df.iterrows():
-        extract_authors_data(row['content_source'], row['id'])
+        extract_authors_data(row['content_source'], row['id'], authors_info)
     
     authors_df = pd.DataFrame(authors_info)
 
