@@ -217,6 +217,8 @@ def task(request):
     images_df = images_df.dropna(subset="src")
     images_df['width'] = pd.to_numeric(images_df['width'], errors='coerce')
     images_df['height'] = pd.to_numeric(images_df['height'], errors='coerce')
+    images_df['ingest_timestamp'] = ingest_timestamp
+    images_df['job_id'] = job_id
 
     # write to gcs
     images_fpath = gcs_base + "images.parquet"
@@ -231,6 +233,8 @@ def task(request):
         extract_link_data(row['content_source'], row['id'], link_info)
     
     links_df = pd.DataFrame(link_info)
+    links_df['ingest_timestamp'] = ingest_timestamp
+    links_df['job_id'] = job_id
 
     # write to gcs
     links_fpath = gcs_base + "links.parquet"
@@ -247,7 +251,9 @@ def task(request):
     # it looks like the parser may add blank entries, but its safe to delete them
     # postid = 43675ea64f5f36ab7475b039aa322936010b0947. <--- all were captured, but parsed an extra with no info
     authors_df = authors_df.dropna(subset=['name', 'image'])
-
+    authors_df['ingest_timestamp'] = ingest_timestamp
+    authors_df['job_id'] = job_id
+    
     # write to gcs
     authors_fpath = gcs_base + "authors.parquet"
     authors_df.to_parquet(authors_fpath, engine='pyarrow')
