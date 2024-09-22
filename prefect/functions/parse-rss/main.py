@@ -1,3 +1,5 @@
+# grab the file from the upstream task in the job and parse for loading into raw tables
+
 import functions_framework
 from google.cloud import secretmanager
 from google.cloud import storage
@@ -15,10 +17,6 @@ version_id = 'latest'
 bucket_name = 'btibert-ba882-fall24-awsblogs'
 
 
-# db setup
-db = 'awsblogs'
-schema = "raw"
-db_schema = f"{db}.{schema}"
 ingest_timestamp = pd.Timestamp.now()
 
 
@@ -29,6 +27,7 @@ def parse_published(date_str):
     dt_naive = dt_with_tz.replace(tzinfo=None)
     timestamp = pd.Timestamp(dt_naive)
     return timestamp
+
 
 def extract_content_source(content):
     raw_value = content[0].get('value')
@@ -105,17 +104,13 @@ def extract_authors_data(html_content, post_id):
                 'bio': bio_text
             }
             authors_info.append(author_data)
-    
+
 
 ############################################################### main task
 
 
 @functions_framework.http
 def task(request):
-
-    # Parse the request data
-    request_json = request.get_json(silent=True)
-    print(f"request: {json.dumps(request_json)}")
 
     # TODO: DELETE THIS: awful, but start with this
     request_json = {
@@ -124,26 +119,17 @@ def task(request):
         "job_id":"202409211821-b20feead-0dc0-431e-9f85-479e6ca8a33f",
         "num_entries":160}
 
-    # get the jobid
+    # Parse the request data
+    request_json = request.get_json(silent=True)
+    print(f"request: {json.dumps(request_json)}")
+
+    # get the jobid and build the gcs base
     job_id = request_json.get('job_id')
+    bucket_name = request_json.get('bucket_name')
+    gcs_base = f'gs://{bucket_name}/jobs/{job_id}/'
 
     # instantiate the services 
-    sm = secretmanager.SecretManagerServiceClient()
     storage_client = storage.Client()
-
-    # Build the resource name of the secret version
-    name = f"projects/{project_id}/secrets/{secret_id}/versions/{version_id}"
-
-    # Access the secret version
-    response = sm.access_secret_version(request={"name": name})
-    md_token = response.payload.data.decode("UTF-8")
-
-    # initiate the MotherDuck connection through an access token through
-    md = duckdb.connect(f'md:?motherduck_token={md_token}') 
-
-    # create the raw schema if it doesnt exist
-    create_schema = f"DROP SCHEMA IF EXISTS {db_schema} CASCADE; CREATE SCHEMA IF NOT EXISTS {db_schema};"
-    md.sql(create_schema)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~get the file that triggered this post
 
@@ -178,23 +164,9 @@ def task(request):
     tags_df['ingest_timestamp'] = ingest_timestamp
     print(f"tags were flatted to shape: {tags_df.shape}") 
 
-    # table sql
-    raw_tbl_name = f"{db_schema}.tags"
-    raw_tbl_sql = f"""
-    DROP TABLE IF EXISTS {raw_tbl_name} ;
-    CREATE TABLE {raw_tbl_name} (
-        term VARCHAR
-        ,post_id VARCHAR
-        ,job_id VARCHAR
-        ,ingest_timestamp TIMESTAMP 
-    );
-    """
-    print(f"{raw_tbl_sql}")
-    md.sql(raw_tbl_sql)
-
-    # ingest
-    md.sql(f"INSERT INTO {raw_tbl_name} SELECT * from tags_df")
-    print(f"rows added to {raw_tbl_name}")
+    # write to gcs
+    tags_fpath = gcs_base + "tags.parquet"
+    tags_df.to_parquet(tags_fpath, engine='pyarrow')
 
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ tbl: posts
@@ -204,7 +176,7 @@ def task(request):
 
     # some light transforms on datetimes for post timestamp and ingestion
     posts_df['published'] = posts_df['published'].apply(parse_published)
-    posts_df['ingest_timestamp'] = pd.Timestamp.now()
+    posts_df['ingest_timestamp'] = ingest_timestamp
 
     # the content isolated
     posts_df['content_source'] = posts_df['content'].apply(extract_content_source)
@@ -224,29 +196,9 @@ def task(request):
     ]
     posts_df = posts_df[keep_cols]
 
-    # table sql
-    raw_tbl_name = f"{db_schema}.posts"
-    raw_tbl_sql = f"""
-    DROP TABLE IF EXISTS {raw_tbl_name} ;
-    CREATE TABLE {raw_tbl_name} (
-        id VARCHAR PRIMARY KEY
-        ,link VARCHAR
-        ,title VARCHAR
-        ,summary VARCHAR
-        ,content_source VARCHAR
-        ,content_text VARCHAR
-        ,job_id VARCHAR
-        ,published TIMESTAMP 
-        ,ingest_timestamp TIMESTAMP
-    );
-    """
-    print(f"{raw_tbl_sql}")
-    md.sql(raw_tbl_sql)
-
-    # ingest
-    md.sql(f"INSERT INTO {raw_tbl_name} SELECT * from posts_df")
-    print(f"rows added to {raw_tbl_name}")
-
+    # write to gcs
+    posts_fpath = gcs_base + "posts.parquet"
+    posts_df.to_parquet(posts_fpath, engine='pyarrow')
 
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ tbl: images
@@ -265,10 +217,12 @@ def task(request):
     images_df['width'] = pd.to_numeric(images_df['width'], errors='coerce')
     images_df['height'] = pd.to_numeric(images_df['height'], errors='coerce')
 
+    # write to gcs
+    images_fpath = gcs_base + "images.parquet"
+    images_df.to_parquet(images_fpath, engine='pyarrow')
 
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ tbl: embedded links
-
 
     # apply the function to each row in the DataFrame
     link_info = []
@@ -277,6 +231,9 @@ def task(request):
     
     links_df = pd.DataFrame(link_info)
 
+    # write to gcs
+    links_fpath = gcs_base + "links.parquet"
+    links_df.to_parquet(links_fpath, engine='pyarrow')
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ tbl: authors
     
@@ -290,10 +247,21 @@ def task(request):
     # postid = 43675ea64f5f36ab7475b039aa322936010b0947. <--- all were captured, but parsed an extra with no info
     authors_df = authors_df.dropna(subset=['name', 'image'])
 
+    # write to gcs
+    authors_fpath = gcs_base + "authors.parquet"
+    authors_df.to_parquet(authors_fpath, engine='pyarrow')
+
 
     ########################### return
+    gcs_links = {
+        'posts': posts_fpath,
+        'tags': tags_fpath,
+        'authors': authors_fpath,
+        'images': images_fpath,
+        'links': links_fpath,
+    }
 
-    return {}, 200
+    return gcs_links, 200
 
 
 

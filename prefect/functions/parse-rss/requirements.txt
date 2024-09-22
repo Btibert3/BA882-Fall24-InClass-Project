@@ -4,3 +4,5 @@ google-cloud-secret-manager
 duckdb==1.1.0
 pandas
 beautifulsoup4
+gcsfs
+pyarrow
