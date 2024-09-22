@@ -19,24 +19,6 @@ raw_db_schema = f"{db}.{schema}"
 stage_db_schema = f"{db}.stage"
 
 
-# instantiate the services 
-sm = secretmanager.SecretManagerServiceClient()
-storage_client = storage.Client()
-
-# Build the resource name of the secret version
-name = f"projects/{project_id}/secrets/{secret_id}/versions/{version_id}"
-
-# Access the secret version
-response = sm.access_secret_version(request={"name": name})
-md_token = response.payload.data.decode("UTF-8")
-
-# initiate the MotherDuck connection through an access token through
-md = duckdb.connect(f'md:?motherduck_token={md_token}') 
-
-# drop if exists and create the raw schema for 
-create_schema = f"DROP SCHEMA IF EXISTS {raw_db_schema} CASCADE; CREATE SCHEMA IF NOT EXISTS {raw_db_schema};"
-md.sql(create_schema)
-
 
 ############################################################### main task
 
@@ -52,9 +34,30 @@ def task(request):
     #     "tags":"gs://btibert-ba882-fall24-awsblogs/jobs/202409211821-b20feead-0dc0-431e-9f85-479e6ca8a33f/tags.parquet"
     # }
 
+
     # Parse the request data
     request_json = request.get_json(silent=True)
     print(f"request: {json.dumps(request_json)}")
+
+    # instantiate the services 
+    sm = secretmanager.SecretManagerServiceClient()
+    storage_client = storage.Client()
+
+    # Build the resource name of the secret version
+    name = f"projects/{project_id}/secrets/{secret_id}/versions/{version_id}"
+
+    # Access the secret version
+    response = sm.access_secret_version(request={"name": name})
+    md_token = response.payload.data.decode("UTF-8")
+
+    # initiate the MotherDuck connection through an access token through
+    md = duckdb.connect(f'md:?motherduck_token={md_token}') 
+
+    # drop if exists and create the raw schema for 
+    create_schema = f"DROP SCHEMA IF EXISTS {raw_db_schema} CASCADE; CREATE SCHEMA IF NOT EXISTS {raw_db_schema};"
+    md.sql(create_schema)
+
+    print(md.sql("SHOW DATABASES;").show())
 
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ tbl: posts
@@ -76,6 +79,7 @@ def task(request):
     ingest_sql = f"INSERT INTO {raw_tbl_name} SELECT * FROM posts_df"
     print(f"Import statement: {ingest_sql}")
     md.sql(ingest_sql)
+    del posts_df
 
     # upsert like operation -- will only insert new records, not update
     upsert_sql = f"""
@@ -108,6 +112,7 @@ def task(request):
     ingest_sql = f"INSERT INTO {raw_tbl_name} SELECT * FROM tags_df"
     print(f"Import statement: {ingest_sql}")
     md.sql(ingest_sql)
+    del tags_df
 
     # upsert like operation -- will only insert new records, not update
     upsert_sql = f"""
@@ -139,6 +144,7 @@ def task(request):
     ingest_sql = f"INSERT INTO {raw_tbl_name} SELECT * FROM links_df"
     print(f"Import statement: {ingest_sql}")
     md.sql(ingest_sql)
+    del links_df
 
     # upsert like operation -- will only insert new records, not update
     upsert_sql = f"""
@@ -171,6 +177,7 @@ def task(request):
     ingest_sql = f"INSERT INTO {raw_tbl_name} SELECT * FROM images_df"
     print(f"Import statement: {ingest_sql}")
     md.sql(ingest_sql)
+    del images_df
 
     # upsert like operation -- will only insert new records, not update
     upsert_sql = f"""
@@ -203,6 +210,7 @@ def task(request):
     ingest_sql = f"INSERT INTO {raw_tbl_name} SELECT * FROM authors_df"
     print(f"Import statement: {ingest_sql}")
     md.sql(ingest_sql)
+    del authors_df
 
     # upsert like operation -- will only insert new records, not update
     upsert_sql = f"""

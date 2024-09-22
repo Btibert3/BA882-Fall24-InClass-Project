@@ -57,3 +57,22 @@ gcloud functions deploy dev-parse-rss \
     --region us-central1 \
     --allow-unauthenticated \
     --memory 512MB 
+
+
+# load the feeds into raw and changes into stage
+echo "======================================================"
+echo "deploying the loader"
+echo "======================================================"
+
+gcloud functions deploy dev-load-rss \
+    --gen2 \
+    --runtime python311 \
+    --trigger-http \
+    --entry-point task \
+    --source ./functions/load-rss \
+    --stage-bucket btibert-ba882-fall24-functions \
+    --service-account etl-pipeline@btibert-ba882-fall24.iam.gserviceaccount.com \
+    --region us-central1 \
+    --allow-unauthenticated \
+    --memory 512MB  \
+    --timeout 60s 
