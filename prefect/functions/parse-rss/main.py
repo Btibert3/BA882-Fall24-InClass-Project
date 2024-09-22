@@ -72,6 +72,40 @@ def extract_link_data(html_content, post_id):
         link_info.append(link_data)
 
 
+def extract_authors_data(html_content, post_id):
+    
+    # Parse the HTML content
+    soup = BeautifulSoup(html_content, 'html.parser')
+    
+    # Find the "About the Authors" section
+    authors_section = soup.find_all('h3', string="About the Authors")
+    
+    if authors_section:
+        # Start searching for author entries after the "About the Authors" section
+        for i, author in enumerate(authors_section[0].find_next_siblings('p')):
+            # Extract author's image
+            author_img = author.find('img')
+            img_src = author_img.get('src') if author_img else None
+            
+            # Extract author's name
+            author_name = author.find('strong').get_text(strip=True) if author.find('strong') else None
+            
+            # Extract author's biography (the remaining text after the strong tag)
+            bio_text = author.get_text(separator=" ", strip=True)
+            if author_name:
+                # Remove the name from the bio to get only the bio text
+                bio_text = bio_text.replace(author_name, '', 1).strip()
+            
+            # Append the author data to the list
+            author_data = {
+                'post_id': post_id,
+                'index': i,
+                'name': author_name,
+                'image': img_src,
+                'bio': bio_text
+            }
+            authors_info.append(author_data)
+    
 
 ############################################################### main task
 
@@ -246,10 +280,15 @@ def task(request):
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ tbl: authors
     
+    authors_info = []
+    for index, row in posts_df.iterrows():
+        extract_authors_data(row['content_source'], row['id'])
+    
+    authors_df = pd.DataFrame(authors_info)
 
-
-
-
+    # it looks like the parser may add blank entries, but its safe to delete them
+    # postid = 43675ea64f5f36ab7475b039aa322936010b0947. <--- all were captured, but parsed an extra with no info
+    authors_df = authors_df.dropna(subset=['name', 'image'])
 
 
     ########################### return
