@@ -112,12 +112,13 @@ def extract_authors_data(html_content, post_id):
 @functions_framework.http
 def task(request):
 
-    # TODO: DELETE THIS: awful, but start with this
-    request_json = {
-        "blob_name":"jobs/202409211821-b20feead-0dc0-431e-9f85-479e6ca8a33f/extracted_entries.json",
-        "bucket_name":"btibert-ba882-fall24-awsblogs",
-        "job_id":"202409211821-b20feead-0dc0-431e-9f85-479e6ca8a33f",
-        "num_entries":160}
+    # # TODO: DELETE THIS: awful, but start with this to help with testing
+    # request_json = {
+    #     "blob_name":"jobs/202409211821-b20feead-0dc0-431e-9f85-479e6ca8a33f/extracted_entries.json",
+    #     "bucket_name":"btibert-ba882-fall24-awsblogs",
+    #     "job_id":"202409211821-b20feead-0dc0-431e-9f85-479e6ca8a33f",
+    #     "num_entries":160
+    # }
 
     # Parse the request data
     request_json = request.get_json(silent=True)
