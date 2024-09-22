@@ -39,3 +39,21 @@ gcloud functions deploy dev-extract-rss \
     --region us-central1 \
     --allow-unauthenticated \
     --memory 256MB 
+
+
+# parse rss
+echo "======================================================"
+echo "deploying the rss parser"
+echo "======================================================"
+
+gcloud functions deploy dev-parse-rss \
+    --gen2 \
+    --runtime python311 \
+    --trigger-http \
+    --entry-point task \
+    --source ./functions/parse-rss \
+    --stage-bucket btibert-ba882-fall24-functions \
+    --service-account etl-pipeline@btibert-ba882-fall24.iam.gserviceaccount.com \
+    --region us-central1 \
+    --allow-unauthenticated \
+    --memory 512MB 
