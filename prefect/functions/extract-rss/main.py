@@ -13,7 +13,7 @@ project_id = 'btibert-ba882-fall24'
 secret_id = 'mother_duck'   #<---------- this is the name of the secret you created
 version_id = 'latest'
 bucket_name = 'btibert-ba882-fall24-awsblogs'
-job_id = datetime.datetime.now().strftime("%Y%m%d%H%M") + "-" + str(uuid.uuid4())
+
 
 ####################################################### helpers
 
@@ -35,6 +35,9 @@ def upload_to_gcs(bucket_name, job_id, data):
 
 @functions_framework.http
 def task(request):
+
+    # job_id
+    job_id = datetime.datetime.now().strftime("%Y%m%d%H%M") + "-" + str(uuid.uuid4())
 
     # instantiate the services 
     sm = secretmanager.SecretManagerServiceClient()
@@ -88,8 +91,8 @@ def task(request):
     gcs_path = upload_to_gcs(bucket_name, job_id, entries_json)
 
     return {
-        'num_entries': len(entries), 
-        'job_id': job_id, 
-        'bucket_name':gcs_path.get('bucket_name'),
-        'blob_name': gcs_path.get('blob_name')
+        "num_entries": len(entries), 
+        "job_id": job_id, 
+        "bucket_name":gcs_path.get('bucket_name'),
+        "blob_name": gcs_path.get('blob_name')
     }, 200
