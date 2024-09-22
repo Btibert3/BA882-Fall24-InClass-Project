@@ -56,6 +56,23 @@ def extract_image_data(html_content, post_id):
         }
         image_info.append(image_data)
 
+
+def extract_link_data(html_content, post_id):
+    soup = BeautifulSoup(html_content, 'html.parser')
+    links = soup.find_all('a')
+    
+    for i,link in enumerate(links):
+        link_data = {
+            'post_id': post_id,
+            'index': i,
+            'href': link.get('href'),
+            'title': link.get_text()
+
+        }
+        link_info.append(link_data)
+
+
+
 ############################################################### main task
 
 
@@ -94,7 +111,7 @@ def task(request):
     create_schema = f"DROP SCHEMA IF EXISTS {db_schema} CASCADE; CREATE SCHEMA IF NOT EXISTS {db_schema};"
     md.sql(create_schema)
 
-    ############################################################### get the file that triggered this post
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~get the file that triggered this post
 
     # Access the 'id' from the incoming request
     bucket_name = request_json.get('bucket_name')
@@ -124,7 +141,7 @@ def task(request):
             tag_rows.append(new_row)
     tags_df = pd.DataFrame(tag_rows) 
     tags_df = tags_df[['term', 'post_id', 'job_id']]  # a couple keys always appear blank
-    tags_df['ingestion_timestamp'] = ingest_timestamp
+    tags_df['ingest_timestamp'] = ingest_timestamp
     print(f"tags were flatted to shape: {tags_df.shape}") 
 
     # table sql
@@ -135,7 +152,7 @@ def task(request):
         term VARCHAR
         ,post_id VARCHAR
         ,job_id VARCHAR
-        ,ingestion_timestamp TIMESTAMP 
+        ,ingest_timestamp TIMESTAMP 
     );
     """
     print(f"{raw_tbl_sql}")
@@ -219,7 +236,15 @@ def task(request):
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ tbl: embedded links
 
 
+    # apply the function to each row in the DataFrame
+    link_info = []
+    for index, row in posts_df.iterrows():
+        extract_link_data(row['content_source'], row['id'])
     
+    links_df = pd.DataFrame(link_info)
+
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ tbl: authors
     
 
 
