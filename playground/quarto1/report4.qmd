@@ -1,0 +1,29 @@
+---
+title: "Crawl Walk Run"
+format:
+  html:
+    embed-resources: true
+---
+
+```{python}
+#| tags: [parameters]
+#| echo: false
+
+year = 2023
+producer_id = 'ABC01'
+```
+
+
+Example here: https://posit.co/blog/parameterized-quarto/
+
+
+Thank you for participating in our `{python} year` project!
+
+> default value year, not producer id
+
+
+quarto render report4.qmd -P year:2025 -P producer_id:BROCK1
+
+had to use base environment, not my project one, install papermill with `pip install papermill` and it worked.  its like quarto doesnt respect the environment, even though some docs troubleshooting this issue suggest it does.
+
+qu

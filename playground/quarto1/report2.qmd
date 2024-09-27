@@ -1,0 +1,32 @@
+---
+title: "Crawl Walk Run"
+format:
+  html:
+    embed-resources: true
+params:
+  name: 
+    default: "Your Name"
+  date:
+    default: "2024-01-01"
+execute:
+  enabled: true
+  echo: false
+---
+
+```{python}
+#| tags: [parameters]
+
+year = 2023
+producer_id = 'ABC01'
+```
+
+
+Example here: https://posit.co/blog/parameterized-quarto/
+
+
+Thank you for participating in our `{python} year` project!
+
+> default value year, not producer id
+
+
+Run with quarto render report2.qmd 
