@@ -2,6 +2,9 @@ from prefect import task, flow
 import random
 import time
 
+# dependency
+# https://docs.prefect.io/3.0/develop/task-runners#access-results-from-submitted-tasks
+
 # Task 1: Simulates a task that always succeeds
 @task
 def task_1():
