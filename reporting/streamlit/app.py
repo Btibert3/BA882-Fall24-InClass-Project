@@ -2,6 +2,13 @@ import streamlit as st
 import duckdb
 import pandas as pd
 from google.cloud import secretmanager
+import numpy as np
+
+from itertools import combinations
+import networkx as nx
+from collections import Counter
+import matplotlib.pyplot as plt
+
 
 # setup
 project_id = 'btibert-ba882-fall24'
@@ -26,7 +33,9 @@ md_token = response.payload.data.decode("UTF-8")
 # initiate the MotherDuck connection through an access token through
 md = duckdb.connect(f'md:?motherduck_token={md_token}') 
 
+############################################ Streamlit App
 
+st.set_page_config(page_title="My Fancy Streamlit App", layout="wide")
 
 # Fetch data and cache based on the query
 # @st.cache_data
@@ -48,80 +57,117 @@ end_date = date_range['max'].to_list()[0]
 
 
 # Dashboard layout
-st.title("AWS Blogs Dashboard")
+st.title("Streamlit - 882")
+st.subheader("To demonstrate concepts - It's just a python script!")
 
-# Sidebar filters
+# Sidebar filters for demo, not functional
 st.sidebar.header("Filters")
+st.sidebar.markdown("One option is to use sidebars for inputs")
 author_filter = st.sidebar.text_input("Search by Author")
 date_filter = st.sidebar.date_input("Post Start Date", (start_date, end_date))
 
+st.sidebar.button("A button to control inputs")
 
-# # SQL Queries for the dashboard
-# post_count_query = f"SELECT COUNT(*) AS post_count FROM {db_schema}.posts"
-# author_count_query = "SELECT COUNT(DISTINCT name) AS author_count FROM authors"
-# tag_count_query = "SELECT COUNT(DISTINCT term) AS tag_count FROM tags"
-# latest_posts_query = "SELECT title, published, summary FROM posts ORDER BY published DESC LIMIT 5"
+st.sidebar.file_uploader("Users can upload files that your app analyzes!")
 
-# # Sidebar filters
-# st.sidebar.header("Filters")
-# author_filter = st.sidebar.text_input("Search by Author")
-# date_filter = st.sidebar.date_input("Filter by Date")
+st.sidebar.markdown("These controls are not wired up to control data, just highlighting you have a lot of control!")
 
-# # Fetch metrics
-# post_count = fetch_data(post_count_query).iloc[0, 0]
-# author_count = fetch_data(author_count_query).iloc[0, 0]
-# tag_count = fetch_data(tag_count_query).iloc[0, 0]
 
-# # Dashboard layout
-# st.title("MotherDuck Data Warehouse Dashboard")
+############ A simple line plot
 
-# # Overview Section
-# st.header("Overview")
-# col1, col2, col3 = st.columns(3)
-# col1.metric("Total Posts", post_count)
-# col2.metric("Total Authors", author_count)
-# col3.metric("Total Tags", tag_count)
+# Parameters for the fake time series data
+num_days = 365  # Number of days for the time series
+start_date = '2023-01-01'  # Start date
 
-# # Display latest posts
-# st.subheader("Latest Posts")
-# latest_posts = fetch_data(latest_posts_query)
-# st.write(latest_posts)
+# Generate a date range
+date_range = pd.date_range(start=start_date, periods=num_days, freq='D')
 
-# # Post Details Section
-# st.subheader("Post Details")
-# if author_filter:
-#     posts_by_author_query = f"SELECT * FROM posts WHERE id IN (SELECT post_id FROM authors WHERE name LIKE '%{author_filter}%')"
-#     posts_by_author = fetch_data(posts_by_author_query)
-#     st.write(posts_by_author)
+# Generate random data (e.g., sales, temperature)
+np.random.seed(42)  # For reproducibility
+values = np.random.randint(50, 150, size=num_days)  # Example: random sales values between 50 and 150
 
-# if date_filter:
-#     posts_by_date_query = f"SELECT * FROM posts WHERE published >= '{date_filter}'"
-#     posts_by_date = fetch_data(posts_by_date_query)
-#     st.write(posts_by_date)
+# Create a pandas DataFrame
+time_series_data = pd.DataFrame({
+    'date': date_range,
+    'value': values
+})
 
-# # Display posts table
-# st.subheader("Explore Posts")
-# all_posts_query = "SELECT * FROM posts"
-# all_posts = fetch_data(all_posts_query)
-# st.write(all_posts)
 
-# # Additional tables
-# st.subheader("Authors")
-# all_authors_query = "SELECT * FROM authors"
-# all_authors = fetch_data(all_authors_query)
-# st.write(all_authors)
+st.line_chart(time_series_data, x="date", y="value")
 
-# st.subheader("Tags")
-# all_tags_query = "SELECT * FROM tags"
-# all_tags = fetch_data(all_tags_query)
-# st.write(all_tags)
+############ Graph of co-association of tags, a touch forward looking
+st.markdown("---")
 
-# st.subheader("Images")
-# all_images_query = "SELECT * FROM images"
-# all_images = fetch_data(all_images_query)
-# st.write(all_images)
+# post tag data
+pt_sql = """
+select post_id, term from awsblogs.stage.tags
+"""
+pt_df = md.sql(pt_sql).df()
 
-# st.subheader("Links")
-# all_links_query = "SELECT * FROM links"
-# all_links = fetch_data(all_links_query)
-# st.write(all_links)
+st.markdown("### You _can_ show data tables")
+st.dataframe(pt_df)
+
+
+st.markdown("### A static network graph")
+st.markdown("We can think of relationships as a graph")
+
+# # Group by post_id and collect co-authors
+cotag_pairs = []
+
+for _, group in pt_df.groupby('post_id'):
+    # Get the unique list of authors for each post
+    terms = group['term'].unique()
+    # Generate all possible pairs of co-authors for this post
+    pairs = combinations(terms, 2)
+    cotag_pairs.extend(pairs)
+
+# # Count the occurrences of each co-author pair (i.e., number of posts co-authored)
+cotag_counter = Counter(cotag_pairs)
+
+# # Create an undirected graph
+G = nx.Graph()
+
+
+# Add edges to the graph with the weight being the number of posts co-authored
+for (term1, term2), weight in cotag_counter.items():
+    G.add_edge(term1, term2, weight=weight)
+
+
+# Recalculate degree centrality for node importance
+degree_centrality = nx.degree_centrality(G)
+
+# Define node sizes based on degree centrality
+node_sizes = [100 * degree_centrality[node] for node in G.nodes()]
+
+# Define edge widths based on the weight (number of posts co-authored)
+edge_weights = [G[u][v]['weight'] for u, v in G.edges()]
+
+# Create the graph layout
+pos = nx.spring_layout(G, k=0.3, seed=42)  
+# pos = nx.circular_layout(G)
+
+# Plot the network
+fig = plt.figure(figsize=(12, 12))
+
+# Draw nodes with size based on centrality
+nx.draw_networkx_nodes(G, pos, node_size=node_sizes, node_color='skyblue', alpha=0.7)
+
+# Draw edges with width based on co-authorship weight
+nx.draw_networkx_edges(G, pos, width=edge_weights, alpha=0.5, edge_color='gray')
+
+plt.title("Tag Graph")
+st.pyplot(fig)
+
+
+############ There are some chat support features, more coming
+
+st.markdown("---")
+
+st.markdown("### There is even some chat features - more coming on the roadmap.")
+
+prompt = st.chat_input("Say something")
+if prompt:
+    st.write(f"User has sent the following prompt: {prompt}")
+
+
+
