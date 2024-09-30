@@ -2,3 +2,5 @@ Flask
 google-cloud-storage
 gunicorn
 papermill
+pandas
+matplotlib
