@@ -7,3 +7,5 @@ payload = {
     "year":2040
 }
 resp = requests.post(url, json=payload)
+
+resp.status_code
