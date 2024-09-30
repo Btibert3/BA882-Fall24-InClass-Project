@@ -33,7 +33,8 @@ Thank you for participating in our `{{python}} year` project!
 
 ## Rendering the report
 
-We can render reports with parameters like so:
+We can render reports with parameters.  Below is an example with two parameters that are defined and included within
+the file report4.qmd.
 
 ```
 quarto render report4.qmd -P year:2025 -P producer_id:BROCK1
