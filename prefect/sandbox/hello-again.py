@@ -14,10 +14,10 @@ def task_two():
 
 # Define the flow that calls the tasks
 @flow
-def simple_flow():
+def simple_again():
     task_one()
     task_two()
 
 # Run the flow
 if __name__ == "__main__":
-    simple_flow()
+    simple_again()
