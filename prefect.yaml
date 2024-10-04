@@ -1,0 +1,41 @@
+# Welcome to your prefect.yaml file! You can use this file for storing and managing
+# configuration for deploying your flows. We recommend committing this file to source
+# control along with your flow code.
+
+# Generic metadata about this project
+name: BA882-Fall24-InClass-Project
+prefect-version: 3.0.4
+
+# build section allows you to manage and build docker images
+build: null
+
+# push section allows you to manage if and how this project is uploaded to remote locations
+push: null
+
+# pull section allows you to provide instructions for cloning this project in remote locations
+pull:
+- prefect.deployments.steps.git_clone:
+    repository: https://github.com/Btibert3/BA882-Fall24-InClass-Project.git
+    branch: main
+
+# the deployments section allows you to provide configuration for deploying flows
+deployments:
+- name: hello-world
+  version: null
+  tags: []
+  concurrency_limit: null
+  description: null
+  entrypoint: prefect/sandbox/hello-world.py:simple_flow
+  parameters: {}
+  work_pool:
+    name: brock-worker1
+    work_queue_name: null
+    job_variables: {}
+  enforce_parameter_schema: true
+  schedules:
+  - cron: 0 0 * * *
+    timezone: UTC
+    day_or: true
+    active: true
+    max_active_runs: null
+    catchup: false
