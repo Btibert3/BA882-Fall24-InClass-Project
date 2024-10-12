@@ -1,4 +1,8 @@
-# load the feeds into raw and changes into stage
+# set the project
+gcloud config set project btibert-ba882-fall24
+
+
+
 echo "======================================================"
 echo "deploying the ml dataset: post-tags"
 echo "======================================================"
