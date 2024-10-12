@@ -80,5 +80,8 @@ def task(request):
         gcs_source=dataset_path.replace("gcs", "gs"),
         sync=True
     )
+    print("datset was created on vertexai")
+
+
 
     return dataset_path, 200
