@@ -1,0 +1,5 @@
+google-cloud-secret-manager
+google-cloud-storage
+google-cloud-aiplatform
+duckdb==1.1.0
+pandas
