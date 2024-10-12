@@ -1,5 +1,5 @@
 # imports
-
+import functions_framework
 from google.cloud import secretmanager
 from google.cloud import storage
 import requests
