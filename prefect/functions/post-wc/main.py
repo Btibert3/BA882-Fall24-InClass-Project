@@ -81,4 +81,4 @@ def task(request):
         sync=True
     )
 
-    return dataset.resource_name, 200
+    return dataset_path, 200

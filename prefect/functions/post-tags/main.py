@@ -3,6 +3,7 @@
 import functions_framework
 from google.cloud import secretmanager
 from google.cloud import storage
+from google.cloud import aiplatform
 import duckdb
 import pandas as pd
 import datetime
@@ -105,4 +106,4 @@ def task(request):
         sync=True
     )
 
-    return dataset.resource_name, 200
+    return dataset_path, 200
