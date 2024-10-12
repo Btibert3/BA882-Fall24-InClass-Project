@@ -84,4 +84,4 @@ def task(request):
 
 
 
-    return dataset_path, 200
+    return {"dataset_path":dataset_path}, 200
