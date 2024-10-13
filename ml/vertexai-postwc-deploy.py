@@ -22,7 +22,7 @@ def get_or_create_endpoint(endpoint_display_name):
     return endpoint
 
 def deploy_model_to_endpoint(model_display_name, endpoint_display_name):
-    """Deploy a model from the Model Registry to an endpoint using n1-standard-2 machine type."""
+    """Deploy a model from the Model Registry to an endpoint."""
     # Initialize Vertex AI platform
     aiplatform.init(project=project_id, location=gcp_region)
 
@@ -38,7 +38,7 @@ def deploy_model_to_endpoint(model_display_name, endpoint_display_name):
     endpoint = get_or_create_endpoint(endpoint_display_name)
 
     # Deploy the model to the endpoint
-    print(f"Deploying model '{model_display_name}' to endpoint '{endpoint_display_name}' using n1-standard-2 machine type...")
+    print(f"Deploying model '{model_display_name}' to endpoint '{endpoint_display_name}'...")
     model.deploy(
         endpoint=endpoint,
         deployed_model_display_name=model_display_name,
