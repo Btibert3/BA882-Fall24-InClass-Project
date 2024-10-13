@@ -98,13 +98,22 @@ def task(request):
     dataset_path = "gcs://" + ml_bucket_name + ml_dataset_path + "post-tags.parquet"
     df.to_parquet(dataset_path)
 
-    # register the dataset on VertexAI
-    print("creating the VertexAI datase - this can take a bit, so we will need to add this into the timeout")
+    # Initialize Vertex AI SDK
+    print("Checking if the dataset already exists on VertexAI")
     aiplatform.init(project=project_id, location=project_region)
-    dataset = aiplatform.TabularDataset.create(
-        display_name="awsblogs-post-tags",
-        gcs_source=dataset_path.replace("gcs", "gs"),
-        sync=True
-    )
 
-    return {"dataset_path":dataset_path}, 200
+    # Check if dataset exists
+    dataset_name = "awsblogs-post-tags"
+    existing_datasets = aiplatform.TabularDataset.list(filter=f"display_name={dataset_name}")
+
+    if existing_datasets:
+        print(f"Dataset '{dataset_name}' already exists. Skipping creation.")
+    else:
+        print(f"Dataset '{dataset_name}' not found. Creating a new one.")
+        dataset = aiplatform.TabularDataset.create(
+            display_name=dataset_name,
+            gcs_source=dataset_path.replace("gcs", "gs"),
+            sync=True
+        )
+
+    return {"dataset_path": dataset_path}, 200
