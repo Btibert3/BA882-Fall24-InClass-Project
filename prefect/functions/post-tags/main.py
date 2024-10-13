@@ -8,7 +8,6 @@ import duckdb
 import pandas as pd
 import datetime
 
-
 # settings
 project_id = 'btibert-ba882-fall24'
 project_region = 'us-central1'
@@ -24,58 +23,60 @@ stage_db_schema = f"{db}.stage"
 ml_schema = f"{db}.ml"
 ml_view_name = "post_tags"
 
-
 ingest_timestamp = pd.Timestamp.now()
-
 
 ############################################################### helpers
 
 ## define the SQL
 ml_view_sql = f"""
 CREATE OR REPLACE VIEW {ml_schema}.{ml_view_name} AS
-with
-posts as (
-    select id, content_text
-    from awsblogs.stage.posts
+WITH
+posts AS (
+    SELECT id, content_text
+    FROM awsblogs.stage.posts
 ),
 
-top_tags as (
-    select lower(term) as term, count(*) as total
-    from awsblogs.stage.tags
-    group by term
-    order by total desc
-    limit 20
+top_tags AS (
+    SELECT LOWER(term) AS term, COUNT(*) AS total
+    FROM awsblogs.stage.tags
+    GROUP BY term
+    ORDER BY total DESC
+    LIMIT 20
 ),
 
-tags as (
-    select t.post_id, lower(t.term) as term
-    from awsblogs.stage.tags t
-    inner join top_tags tt on lower(t.term) = lower(tt.term)
+tags AS (
+    SELECT t.post_id, LOWER(t.term) AS term
+    FROM awsblogs.stage.tags t
+    INNER JOIN top_tags tt ON LOWER(t.term) = LOWER(tt.term)
 )
 
-select
+SELECT
     p.id,
     p.content_text,
-    string_agg(lower(t.term), ',') AS labels,
+    STRING_AGG(LOWER(t.term), ',') AS labels,
     CURRENT_TIMESTAMP AS created_at
-from posts p
-inner join tags t on p.id = t.post_id
-group by p.id, p.content_text;
+FROM posts p
+INNER JOIN tags t ON p.id = t.post_id
+GROUP BY p.id, p.content_text;
 """
+
+# Helper to check if dataset exists in Vertex AI
+def get_existing_dataset(display_name):
+    datasets = aiplatform.TabularDataset.list(
+        filter=f'display_name="{display_name}"'
+    )
+    return datasets[0] if datasets else None
 
 ############################################################### main task
 
-
 @functions_framework.http
 def task(request):
-
-    # we will not be passing in any data into the request
 
     # instantiate the services 
     sm = secretmanager.SecretManagerServiceClient()
     storage_client = storage.Client()
 
-    # connect to motherduck, the cloud datawarehouse
+    # connect to Motherduck, the cloud data warehouse
     print("connecting to Motherduck")
     name = f"projects/{project_id}/secrets/{secret_id}/versions/{version_id}"
     response = sm.access_secret_version(request={"name": name})
@@ -83,28 +84,42 @@ def task(request):
     md = duckdb.connect(f'md:?motherduck_token={md_token}') 
 
     # create the view
-    print("creating the schema if it doesnt exist and creating/updating the view")
+    print("Creating the schema if it doesn't exist and creating/updating the view")
     md.sql(f"CREATE SCHEMA IF NOT EXISTS {ml_schema};")
     md.sql(ml_view_sql)
 
     # grab the view as a pandas dataframe, just the text and the labels
-    df = md.sql(f"select content_text, labels from {ml_schema}.{ml_view_name};").df()
+    df = md.sql(f"SELECT content_text, labels FROM {ml_schema}.{ml_view_name};").df()
 
     # cleanup for modeling - a list column for use in sklearn
     df['labels'] = df['labels'].apply(lambda x: x.split(','))
 
     # write the dataset to the training dataset path on GCS
-    print("writing the parquet file to gcs")
+    print("Writing the parquet file to GCS")
     dataset_path = "gcs://" + ml_bucket_name + ml_dataset_path + "post-tags.parquet"
     df.to_parquet(dataset_path)
 
-    # register the dataset on VertexAI
-    print("creating the VertexAI datase - this can take a bit, so we will need to add this into the timeout")
+    # Initialize Vertex AI
+    print("Creating or updating the Vertex AI dataset")
     aiplatform.init(project=project_id, location=project_region)
-    dataset = aiplatform.TabularDataset.create(
-        display_name="awsblogs-post-tags",
-        gcs_source=dataset_path.replace("gcs", "gs"),
-        sync=True
-    )
+    
+    # Check if the dataset already exists
+    display_name = "awsblogs-post-tags"
+    existing_dataset = get_existing_dataset(display_name)
 
-    return {"dataset_path":dataset_path}, 200
+    if existing_dataset:
+        print(f"Dataset '{display_name}' already exists. Updating the dataset...")
+        # Import updated data into the existing dataset
+        existing_dataset.import_data(gcs_source=dataset_path.replace("gcs", "gs"))
+        print(f"Dataset '{display_name}' updated successfully.")
+    else:
+        print(f"Creating new dataset '{display_name}' on Vertex AI...")
+        dataset = aiplatform.TabularDataset.create(
+            display_name=display_name,
+            gcs_source=dataset_path.replace("gcs", "gs"),
+            sync=True
+        )
+        print(f"Dataset '{display_name}' created successfully.")
+
+    return {"dataset_path": dataset_path}, 200
+
