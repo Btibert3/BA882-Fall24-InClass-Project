@@ -68,9 +68,9 @@ def task(request):
     df = md.sql(f"select title, word_count from {ml_schema}.{ml_view_name};").df()
 
     # write the dataset to the training dataset path on GCS
-    print("writing the parquet file to gcs")
-    dataset_path = "gcs://" + ml_bucket_name + ml_dataset_path + "post-length.parquet"
-    df.to_parquet(dataset_path)
+    print("writing the csv file to gcs")
+    dataset_path = "gcs://" + ml_bucket_name + ml_dataset_path + "post-length.csv"
+    df.to_csv(dataset_path, index=False)
 
     # Initialize Vertex AI SDK
     print("Checking if the dataset already exists on VertexAI")

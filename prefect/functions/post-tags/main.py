@@ -94,9 +94,9 @@ def task(request):
     df['labels'] = df['labels'].apply(lambda x: x.split(','))
 
     # write the dataset to the training dataset path on GCS
-    print("writing the parquet file to gcs")
-    dataset_path = "gcs://" + ml_bucket_name + ml_dataset_path + "post-tags.parquet"
-    df.to_parquet(dataset_path)
+    print("writing the csv file to gcs")
+    dataset_path = "gcs://" + ml_bucket_name + ml_dataset_path + "post-tags.csv"
+    df.to_csv(dataset_path, index=False)
 
     # Initialize Vertex AI SDK
     print("Checking if the dataset already exists on VertexAI")
