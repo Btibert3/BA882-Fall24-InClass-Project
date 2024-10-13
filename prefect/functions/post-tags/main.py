@@ -11,6 +11,7 @@ import datetime
 
 # settings
 project_id = 'btibert-ba882-fall24'
+project_region = 'us-central1'
 secret_id = 'mother_duck'   #<---------- this is the name of the secret you created
 version_id = 'latest'
 bucket_name = 'btibert-ba882-fall24-awsblogs'
