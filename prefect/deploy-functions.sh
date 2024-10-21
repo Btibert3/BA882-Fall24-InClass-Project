@@ -76,3 +76,4 @@ gcloud functions deploy dev-load-rss \
     --allow-unauthenticated \
     --memory 512MB  \
     --timeout 60s 
+
