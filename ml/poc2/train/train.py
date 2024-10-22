@@ -23,7 +23,7 @@ project_id = os.getenv('GCP_PROJECT', 'btibert-ba882-fall24')
 gcp_region = os.getenv('GCP_REGION', 'us-central1')
 bucket_name = os.getenv('GCS_BUCKET', 'btibert-ba882-fall24-vertex-models')
 training_data_path = os.getenv('TRAINING_DATA_PATH', 'training-data/post-tags/post-tags.csv')
-model_output_path = os.getenv('MODEL_OUTPUT_PATH', 'models/colab-poc/')
+model_output_path = os.getenv('MODEL_OUTPUT_PATH', 'models/post-tags/')
 
 # Function to load CSV from GCS
 def load_data_from_gcs(bucket_name, file_path):
@@ -44,7 +44,7 @@ def save_model_to_gcs(model, bucket_name, model_output_path):
     joblib.dump(model, model_path)
 
     # Upload the model to GCS under a "model" subdirectory
-    blob = bucket.blob(os.path.join(model_output_path, 'model', model_filename))
+    blob = bucket.blob(os.path.join(model_output_path, model_filename))
     blob.upload_from_filename(model_path)
     return os.path.join('gs://', bucket_name, model_output_path, model_filename)
 
