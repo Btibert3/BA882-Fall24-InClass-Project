@@ -2,3 +2,4 @@ fastapi
 uvicorn
 scikit-learn
 joblib
+google-cloud-storage
