@@ -35,8 +35,8 @@ gcloud ai models upload \
   --region=$REGION \
   --display-name=post-tags-scikit-model \
   --container-image-uri=$DEPLOY_IMAGE_URI \
-  --predict-route="/predict" \
-  --health-route="/" 
+  --container-predict-route="/predict" \
+  --container-health-route="/" 
 
 
 # echo "======================================================"
