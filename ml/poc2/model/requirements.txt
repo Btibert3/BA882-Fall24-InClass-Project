@@ -3,3 +3,5 @@ uvicorn
 scikit-learn
 joblib
 google-cloud-storage
+pydantic
+numpy

@@ -36,7 +36,8 @@ gcloud ai models upload \
   --display-name=post-tags-scikit-model \
   --container-image-uri=$DEPLOY_IMAGE_URI \
   --container-predict-route="/predict" \
-  --container-health-route="/" 
+  --container-health-route="/"  \
+  --artifact-uri="gs://btibert-ba882-fall24-vertex-models/models/post-tags"
 
 
 # echo "======================================================"
