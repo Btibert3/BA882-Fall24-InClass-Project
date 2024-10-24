@@ -28,3 +28,13 @@ model = job.run(
     budget_milli_node_hours=1000,  # 1000 milli node hours = 1 node hour
     model_display_name="automl-shots-model"
 )
+
+# deploy the endpoint
+endpoint = model.deploy(
+    machine_type="n2-standard-2",
+    min_replica_count=1,
+    max_replica_count=1
+)
+
+# tear down the endpoint
+endpoint.delete()
