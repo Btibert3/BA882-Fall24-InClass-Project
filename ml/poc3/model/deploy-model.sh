@@ -36,18 +36,33 @@ echo "======================================================"
 echo "deploy the endpoint"
 echo "======================================================"
 
-gcloud ai endpoints create \
-  --region=us-central1 \
-  --display-name=post-length-endpoint
+# gcloud ai endpoints create \
+#   --region=us-central1 \
+#   --display-name=post-length-endpoint
 
 # mangually adding in the values for the endpoint first, and then the model
 
-gcloud ai endpoints deploy-model 5499828630391357440 \
-  --region=us-central1 \
-  --model=7539805329962303488 \
-  --display-name=post-length-deployment \
-  --machine-type=n1-standard-4 \
-  --min-replica-count=1 \
-  --max-replica-count=1 \
-  --service-account=vertex-ai-sa@btibert-ba882-fall24.iam.gserviceaccount.com \
-  --traffic-split=0=100
+# gcloud ai endpoints deploy-model 5499828630391357440 \
+#   --region=us-central1 \
+#   --model=7539805329962303488 \
+#   --display-name=post-length-deployment \
+#   --machine-type=n1-standard-4 \
+#   --min-replica-count=1 \
+#   --max-replica-count=1 \
+#   --service-account=vertex-ai-sa@btibert-ba882-fall24.iam.gserviceaccount.com \
+#   --traffic-split=0=100
+
+
+# find the deployed model id
+# gcloud ai endpoints describe 5499828630391357440 \
+#     --region=us-central1
+
+# undeploy the model - id grabbed from above
+# gcloud ai endpoints undeploy-model 5499828630391357440 \
+#     --region=us-central1 \
+#     --deployed-model-id=4523928497856446464
+
+
+# tear down the endpoint
+# gcloud ai endpoints delete 5499828630391357440 \
+#     --region=us-central1 --quiet
