@@ -32,24 +32,22 @@ gcloud ai models upload \
   --container-predict-route=/predict \
   --container-health-route=/health
 
+echo "======================================================"
+echo "deploy the endpoint"
+echo "======================================================"
 
-# echo "======================================================"
-# echo "deploy the endpoint and assign the model to the endpoint"
-# echo "this is you want a model to be available for real time predictions"
-# echo "======================================================"
+gcloud ai endpoints create \
+  --region=us-central1 \
+  --display-name=post-length-endpoint
 
-# Create an endpoint
-# gcloud ai endpoints create \
-#   --region=$REGION \
-#   --display-name=post-tags-scikit-endpoint
+# mangually adding in the values for the endpoint first, and then the model
 
-# Deploy the model to the endpoint
-# gcloud ai endpoints deploy-model \
-#   --region=$REGION \
-#   --endpoint=ENDPOINT_ID  # Replace with the actual endpoint ID
-#   --model=MODEL_ID  # Replace with the registered model ID
-#   --machine-type=n1-standard-2 \
-#   --min-replica-count=1 \
-#   --max-replica-count=1 \
-#   --traffic-split=0=100
-
+gcloud ai endpoints deploy-model 5499828630391357440 \
+  --region=us-central1 \
+  --model=7539805329962303488 \
+  --display-name=post-length-deployment \
+  --machine-type=n1-standard-4 \
+  --min-replica-count=1 \
+  --max-replica-count=1 \
+  --service-account=vertex-ai-sa@btibert-ba882-fall24.iam.gserviceaccount.com \
+  --traffic-split=0=100
