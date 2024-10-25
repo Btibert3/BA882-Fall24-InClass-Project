@@ -42,15 +42,15 @@ echo "======================================================"
 
 # mangually adding in the values for the endpoint first, and then the model
 
-# gcloud ai endpoints deploy-model 5499828630391357440 \
-#   --region=us-central1 \
-#   --model=7539805329962303488 \
-#   --display-name=post-length-deployment \
-#   --machine-type=n1-standard-4 \
-#   --min-replica-count=1 \
-#   --max-replica-count=1 \
-#   --service-account=vertex-ai-sa@btibert-ba882-fall24.iam.gserviceaccount.com \
-#   --traffic-split=0=100
+gcloud ai endpoints deploy-model 2760514157043253248 \
+  --region=us-central1 \
+  --model=3491069264956227584 \
+  --display-name=post-length-deployment \
+  --machine-type=n1-standard-4 \
+  --min-replica-count=1 \
+  --max-replica-count=1 \
+  --service-account=vertex-ai-sa@btibert-ba882-fall24.iam.gserviceaccount.com \
+  --traffic-split=0=100
 
 
 # find the deployed model id

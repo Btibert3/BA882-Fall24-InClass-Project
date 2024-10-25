@@ -43,10 +43,13 @@ def predict():
     
     # Extract instances from the request
     instances = request_json["instances"]
+    print(instances)
     
     # Convert instances to pandas Series since that's what the pipeline expects
     # The pipeline was trained on df['title'] which is a pandas Series
-    titles = pd.Series(instances[0] if isinstance(instances[0], str) else instances[0][0])
+    # titles = pd.Series(instances[0] if isinstance(instances[0], str) else instances[0][0])
+    titles = pd.Series([inst[0] for inst in instances])
+    print(titles)
     
     # Make prediction using the pipeline
     predictions = model.predict(titles).tolist()
