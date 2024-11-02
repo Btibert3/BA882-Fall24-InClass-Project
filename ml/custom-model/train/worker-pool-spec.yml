@@ -1,0 +1,7 @@
+workerPoolSpecs:
+  - machineSpec:
+      machineType: e2-standard-4
+    replicaCount: 1
+    containerSpec:
+      imageUri: gcr.io/your-project/post-length-train:latest
+serviceAccount: SERVICE_ACCOUNT_EMAIL
