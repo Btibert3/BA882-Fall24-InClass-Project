@@ -1,0 +1,101 @@
+{
+  "pipelineSpec": {
+    "schemaVersion": "2.1.0",
+    "components": {
+      "comp-batch-prediction": {
+        "executorLabel": "exec-batch-prediction",
+        "inputDefinitions": {
+          "parameters": {
+            "model": {"type": "STRING"},
+            "gcs_source_uri": {"type": "STRING"},
+            "instances_format": {"type": "STRING"},
+            "predictions_format": {"type": "STRING"}
+          }
+        },
+        "outputDefinitions": {
+          "artifacts": {
+            "predictions": {"artifactType": {"schemaTitle": "system.Dataset"}}
+          }
+        }
+      },
+      "comp-model-evaluation": {
+        "executorLabel": "exec-model-evaluation",
+        "inputDefinitions": {
+          "parameters": {
+            "prediction_type": {"type": "STRING"},
+            "target_field_name": {"type": "STRING"},
+            "model": {"type": "STRING"}
+          },
+          "artifacts": {
+            "predictions": {"artifactType": {"schemaTitle": "system.Dataset"}}
+          }
+        },
+        "outputDefinitions": {
+          "artifacts": {
+            "evaluation": {"artifactType": {"schemaTitle": "system.Artifact"}}
+          }
+        }
+      }
+    },
+    "deploymentSpec": {
+      "executors": {
+        "exec-batch-prediction": {
+          "container": {
+            "image": "gcr.io/cloud-aiplatform/prediction",
+            "command": ["python3", "-m", "batch_prediction"]
+          }
+        },
+        "exec-model-evaluation": {
+          "container": {
+            "image": "gcr.io/cloud-aiplatform/evaluation",
+            "command": ["python3", "-m", "model_evaluation"]
+          }
+        }
+      }
+    },
+    "root": {
+      "dag": {
+        "tasks": {
+          "batch-prediction": {
+            "componentRef": {"name": "comp-batch-prediction"},
+            "inputs": {
+              "parameters": {
+                "model": {"runtimeValue": {"constantValue": {"stringValue": "{{$.inputs.parameters.model}}"}}},
+                "gcs_source_uri": {"runtimeValue": {"constantValue": {"stringValue": "{{$.inputs.parameters.gcs_source_uri}}"}}},
+                "instances_format": {"runtimeValue": {"constantValue": {"stringValue": "{{$.inputs.parameters.batch_predict_instances_format}}"}}},
+                "predictions_format": {"runtimeValue": {"constantValue": {"stringValue": "{{$.inputs.parameters.batch_predict_predictions_format}}"}}}
+              }
+            },
+            "taskInfo": {"name": "Batch Prediction"}
+          },
+          "model-evaluation": {
+            "componentRef": {"name": "comp-model-evaluation"},
+            "dependentTasks": ["batch-prediction"],
+            "inputs": {
+              "parameters": {
+                "prediction_type": {"runtimeValue": {"constantValue": {"stringValue": "{{$.inputs.parameters.prediction_type}}"}}},
+                "target_field_name": {"runtimeValue": {"constantValue": {"stringValue": "{{$.inputs.parameters.target_field_name}}"}}},
+                "model": {"runtimeValue": {"constantValue": {"stringValue": "{{$.inputs.parameters.model}}"}}}
+              },
+              "artifacts": {
+                "predictions": {"taskOutputArtifact": {"producerTask": "batch-prediction", "outputArtifactKey": "predictions"}}
+              }
+            },
+            "taskInfo": {"name": "Model Evaluation"}
+          }
+        }
+      }
+    }
+  },
+  "runtimeConfig": {
+    "parameters": {
+      "prediction_type": "STRING",
+      "target_field_name": "STRING",
+      "model": "STRING",
+      "gcs_source_uri": "STRING",
+      "batch_predict_instances_format": "STRING",
+      "batch_predict_predictions_format": "STRING",
+      "evaluation_display_name": "STRING"
+    }
+  }
+}
