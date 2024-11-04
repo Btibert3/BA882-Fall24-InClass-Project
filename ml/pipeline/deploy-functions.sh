@@ -57,3 +57,21 @@ gcloud functions deploy mlops-postlength-prediction \
     --region us-central1 \
     --allow-unauthenticated \
     --memory 1GB
+
+
+# the offline batch function
+echo "======================================================"
+echo "bulk/batch prediction job"
+echo "======================================================"
+
+gcloud functions deploy mlops-postlength-batch \
+    --gen2 \
+    --runtime python311 \
+    --trigger-http \
+    --entry-point task \
+    --source ./functions/batch \
+    --stage-bucket btibert-ba882-fall24-functions \
+    --service-account etl-pipeline@btibert-ba882-fall24.iam.gserviceaccount.com \
+    --region us-central1 \
+    --allow-unauthenticated \
+    --memory 1GB
