@@ -45,6 +45,7 @@ def task(request):
         job_id VARCHAR PRIMARY KEY
         ,name VARCHAR
         ,gcs_path VARCHAR
+        ,model_path VARCHAR
         ,created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
     """

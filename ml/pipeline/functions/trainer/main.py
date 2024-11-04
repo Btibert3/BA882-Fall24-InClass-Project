@@ -116,8 +116,8 @@ def task(request):
     
     ############################################# write the data to the mlops schema
     insert_query = f"""
-    INSERT INTO {db_schema}.model_runs (job_id, name, gcs_path)
-    VALUES ('{job_id}', '{model_name}', '{ GCS_BUCKET + "/" + GCS_PATH}');
+    INSERT INTO {db_schema}.model_runs (job_id, name, gcs_path, model_path)
+    VALUES ('{job_id}', '{model_name}', '{ GCS_BUCKET + "/" + GCS_PATH}', '{GCS}');
     """
     print(f"mlops to warehouse: {insert_query}")
     md.sql(insert_query)
