@@ -40,3 +40,20 @@ gcloud functions deploy mlops-postlength-trainer \
     --allow-unauthenticated \
     --memory 1GB
 
+
+# the predictions function
+echo "======================================================"
+echo "dynamic prediction endpoint"
+echo "======================================================"
+
+gcloud functions deploy mlops-postlength-prediction \
+    --gen2 \
+    --runtime python311 \
+    --trigger-http \
+    --entry-point task \
+    --source ./functions/prediction \
+    --stage-bucket btibert-ba882-fall24-functions \
+    --service-account etl-pipeline@btibert-ba882-fall24.iam.gserviceaccount.com \
+    --region us-central1 \
+    --allow-unauthenticated \
+    --memory 1GB
