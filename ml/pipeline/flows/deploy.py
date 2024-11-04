@@ -13,10 +13,10 @@ if __name__ == "__main__":
         tags=["prod"],
         description="Pipeline to train a model and log metrics and parameters for a training job",
         version="1.0.0",
-        # triggers=[
-        #     DeploymentEventTrigger(
-        #         expect={"prefect.flow-run.Completed"},
-        #         match_related={"prefect.resource.name": "ml-datasets"}
-        #     )
-        # ]
+        triggers=[
+            DeploymentEventTrigger(
+                expect={"prefect.flow-run.Completed"},
+                match_related={"prefect.resource.name": "ml-datasets"}
+            )
+        ]
     )
