@@ -3,6 +3,10 @@ import functions_framework
 import joblib
 import json
 from gcsfs import GCSFileSystem
+import pandas as pd
+from google.cloud import secretmanager
+from google.cloud import storage
+import duckdb
 
 
 # db setup
@@ -50,12 +54,17 @@ print(f"Getting model: {model_path}")
 with GCSFileSystem().open(model_path, 'rb') as f:
     model_pipeline = joblib.load(f)
 
+# flatten for inclusion in the result
+json_output = results.iloc[0].to_dict()
+json_output['created_at'] = json_output['created_at'].isoformat()
+
 @functions_framework.http
 def task(request):
     "Make predictions for the model"
 
     # Parse the request data
     request_json = request.get_json(silent=True)
+    print(request_json)
 
     # load the data key which is a list of text for inference
     data_list = request_json.get('data')
@@ -66,4 +75,4 @@ def task(request):
     # convert to a list for return
     preds_list = preds.tolist()
 
-    return {'predictions':preds_list}, 200
+    return {'predictions':preds_list, 'model_info': json_output}, 200

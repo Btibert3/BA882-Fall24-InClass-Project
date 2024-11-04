@@ -6,3 +6,4 @@ pyarrow
 joblib
 google-cloud-storage
 duckdb==1.1.0
+google-cloud-secret-manager
