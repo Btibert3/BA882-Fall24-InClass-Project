@@ -6,6 +6,7 @@ from google.cloud import secretmanager
 import duckdb
 import requests
 import json
+import pandas as pd
 
 # settings
 project_id = 'btibert-ba882-fall24'

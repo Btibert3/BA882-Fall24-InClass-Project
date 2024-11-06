@@ -5,27 +5,27 @@ from google.cloud import aiplatform
 
 project_id = 'btibert-ba882-fall24'
 gcp_region = 'us-central1'
-exp_name = "my-fancy-experiment"
+exp_name = "post-length-revision-pl045"
 
 
 aiplatform.init(project=project_id, 
                 location=gcp_region,
                 experiment=exp_name,
-                experiment_description="My meaningful description here",
+                experiment_description="Revisit different models to improve fit",
                 experiment_tensorboard=None)
 
 # no spaces, regex [a-z0-9][a-z0-9-]{0,127}
-aiplatform.start_run(run="post-length-1")
+aiplatform.start_run(run="post-length-2")
 
 metrics = {
-    "r2": 0.92,           # Replace with your R² value
-    "mape": 8.5,          # Replace with your MAPE value (percentage)
-    "mae": 3.2            # Replace with your MAE value
+    "r2": 0.94,           # Replace with your R² value
+    "mape": 8.1,          # Replace with your MAPE value (percentage)
+    "mae": 3.0            # Replace with your MAE value
 }
 
 params = {
-    'max_tokens': 5000,
-    'ngram': str((1,2)),
+    'max_tokens': 7500,
+    'ngram': str((1,3)),
     'model': 'LinearRegression'
 }
 
