@@ -25,50 +25,40 @@ GCP_REGION = "us-central1"
 vertexai.init(project=GCP_PROJECT, location=GCP_REGION)
 
 
-
-
 ######################################################################## Streamlit App 1 - Simple Conversational Agent
 
-def page1():
-    # that chat model
-    model = GenerativeModel("gemini-1.5-flash-002")
-    chat_session = model.start_chat()
 
-    # helper to grab the response
-    def get_chat_response(chat: ChatSession, prompt: str) -> str:
-        text_response = []
-        responses = chat.send_message(prompt, stream=True)
-        for chunk in responses:
-            text_response.append(chunk.text)
-        return "".join(text_response)
+# that chat model
+model = GenerativeModel("gemini-1.5-flash-002")
+chat_session = model.start_chat()
 
-    st.markdown("---")
+# helper to grab the response
+def get_chat_response(chat: ChatSession, prompt: str) -> str:
+    text_response = []
+    responses = chat.send_message(prompt, stream=True)
+    for chunk in responses:
+        text_response.append(chunk.text)
+    return "".join(text_response)
 
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
+st.markdown("---")
 
-
-    # React to user input
-    if prompt := st.chat_input("What is up?"):
-        # Display user message in chat message container
-        st.chat_message("user").markdown(prompt)
-        # Add user message to chat history
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        # get a response from the chat session with GCP
-        response = get_chat_response(chat_session, prompt)
-        # playback the response
-        with st.chat_message("assistant"):
-            st.markdown(response)
-        # Add assistant response to chat history
-        st.session_state.messages.append({"role": "assistant", "content": response})
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
 
 
-pg = st.navigation(
-    [st.Page(page1, title="Chat Assistant")]
-)
+# React to user input
+if prompt := st.chat_input("What is up?"):
+    # Display user message in chat message container
+    st.chat_message("user").markdown(prompt)
+    # Add user message to chat history
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    # get a response from the chat session with GCP
+    response = get_chat_response(chat_session, prompt)
+    # playback the response
+    with st.chat_message("assistant"):
+        st.markdown(response)
+    # Add assistant response to chat history
+    st.session_state.messages.append({"role": "assistant", "content": response})
 
-try:
-    pg.run()
-except:
-    st.error(f"Something went wrong: {str(e)}", icon=":material/error:")
+
