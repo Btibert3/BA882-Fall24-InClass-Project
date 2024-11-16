@@ -1,3 +1,4 @@
 streamlit 
 vertexai
 google-cloud-aiplatform
+llama-index
