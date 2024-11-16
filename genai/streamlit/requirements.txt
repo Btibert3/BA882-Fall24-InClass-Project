@@ -1,0 +1,10 @@
+streamlit 
+matplotlib
+networkx
+google-cloud-secret-manager
+numpy
+pandas
+duckdb
+vertexai
+google-cloud-storage
+google-cloud-aiplatform
