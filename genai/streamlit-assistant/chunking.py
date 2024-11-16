@@ -16,6 +16,8 @@ chunk_strategy = st.sidebar.selectbox(
 chunk_size = st.sidebar.slider("Chunk Size (tokens/words)", 0, 1000, step=10, value=300)
 chunk_overlap = st.sidebar.slider("Chunk Overlap", 0, 100, step=2, value=50)
 
+st.sidebar.markdown("---")
+
 # Text Input
 st.header("Input Text")
 input_text = st.text_area("Paste your text here:", height=200)
@@ -31,12 +33,15 @@ if st.button("Chunk Text"):
         if chunk_strategy == "Fixed Size":
             parser = TokenTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
             chunks = parser.split_text(input_text)
+            st.sidebar.markdown("The TokenTextSplitter attempts to split to a consistent chunk size according to raw token counts.")
         elif chunk_strategy == "Semantic (Sentences)":
             parser = SentenceSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
             chunks = parser.split_text(input_text)
+            st.sidebar.markdown("The SentenceSplitter attempts to split text while respecting the boundaries of sentences.")
         elif chunk_strategy == "Paragraph-based":
             # Paragraph-based chunking (splits by newlines)
             chunks = input_text.split("\n\n")  # Splitting by paragraphs
+            st.sidebar.markdown("The settings above are ignored, looks for '`\n\n`' to define paragraphs.")
         elif chunk_strategy == "RecursiveCharacterTextSplitter":
             text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
             parser = LangchainNodeParser(text_splitter)
@@ -45,6 +50,7 @@ if st.button("Chunk Text"):
                 id_="doc-1"      # LlamaIndex uses 'id_' instead of 'id'
             )
             chunks = parser.get_nodes_from_documents([document])
+            st.sidebar.markdown("""Llama-index plays nicely with Langchain! This text splitter is the recommended one for generic text. It is parameterized by a list of characters. It tries to split on them in order until the chunks are small enough. The default list is ["\n\n", "\n", " ", ""]. This has the effect of trying to keep all paragraphs (and then sentences, and then words) together as long as possible, as those would generically seem to be the strongest semantically related pieces of text.""")
 
         # Display chunked output
         for idx, chunk in enumerate(chunks):
