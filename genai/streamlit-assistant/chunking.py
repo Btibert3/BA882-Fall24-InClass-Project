@@ -1,5 +1,8 @@
 import streamlit as st
 from llama_index.core.node_parser import TokenTextSplitter, SentenceSplitter
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from llama_index.core.node_parser import LangchainNodeParser
+from llama_index.core import Document
 
 st.title("LlamaIndex")
 st.markdown("https://docs.llamaindex.ai/en/stable/")
@@ -8,7 +11,7 @@ st.markdown("https://docs.llamaindex.ai/en/stable/")
 st.sidebar.header("Chunking Options")
 chunk_strategy = st.sidebar.selectbox(
     "Choose a Chunking Strategy",
-    ["Fixed Size", "Semantic (Sentences)", "Paragraph-based"]
+    ["Fixed Size", "Semantic (Sentences)", "Paragraph-based", "RecursiveCharacterTextSplitter"]
 )
 chunk_size = st.sidebar.slider("Chunk Size (tokens/words)", 0, 1000, step=10, value=300)
 chunk_overlap = st.sidebar.slider("Chunk Overlap", 0, 100, step=2, value=50)
@@ -34,6 +37,14 @@ if st.button("Chunk Text"):
         elif chunk_strategy == "Paragraph-based":
             # Paragraph-based chunking (splits by newlines)
             chunks = input_text.split("\n\n")  # Splitting by paragraphs
+        elif chunk_strategy == "RecursiveCharacterTextSplitter":
+            text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+            parser = LangchainNodeParser(text_splitter)
+            document = Document(
+                text=input_text,  # LlamaIndex uses 'text' instead of 'page_content'
+                id_="doc-1"      # LlamaIndex uses 'id_' instead of 'id'
+            )
+            chunks = parser.get_nodes_from_documents([document])
 
         # Display chunked output
         for idx, chunk in enumerate(chunks):
