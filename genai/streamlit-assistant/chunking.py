@@ -4,6 +4,9 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from llama_index.core.node_parser import LangchainNodeParser
 from llama_index.core import Document
 
+st.image("https://questromworld.bu.edu/ftmba/wp-content/uploads/sites/42/2021/11/Questrom-1-1.png")
+
+
 st.title("LlamaIndex")
 st.markdown("https://docs.llamaindex.ai/en/stable/")
 

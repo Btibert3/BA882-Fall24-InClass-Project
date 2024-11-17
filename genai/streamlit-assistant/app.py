@@ -8,4 +8,3 @@ pg = st.navigation([
     ])
 pg.run()
 
-# TODO: doc comparisons/summary with history

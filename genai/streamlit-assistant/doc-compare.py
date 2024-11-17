@@ -62,6 +62,9 @@ def compare_texts(text1, text2):
         st.error(f"Error in Vertex AI comparison: {str(e)}")
         return None
 
+
+
+st.image("https://questromworld.bu.edu/ftmba/wp-content/uploads/sites/42/2021/11/Questrom-1-1.png")
 st.title("PDF Comparison Analysis")
 
 
