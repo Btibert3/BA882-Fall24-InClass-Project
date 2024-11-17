@@ -1,5 +1,6 @@
 import streamlit as st
 
+st.set_page_config(page_title="POC GenAI Apps", layout="wide")
 
 pg = st.navigation([
     st.Page("assistants.py", title="Simple Chat Assistant", icon=":material/chat:"), 

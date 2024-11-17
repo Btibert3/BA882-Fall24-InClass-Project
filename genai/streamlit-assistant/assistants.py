@@ -4,7 +4,7 @@ import vertexai
 from vertexai.generative_models import GenerativeModel, ChatSession
 
 ############################################## streamlit setup
-st.set_page_config(page_title="My Fancy Streamlit App", layout="wide")
+
 
 st.image("https://questromworld.bu.edu/ftmba/wp-content/uploads/sites/42/2021/11/Questrom-1-1.png")
 
