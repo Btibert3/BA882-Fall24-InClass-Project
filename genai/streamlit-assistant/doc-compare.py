@@ -53,7 +53,7 @@ def compare_texts(text1, text2):
         3. Unique points in each document
         4. Overall summary of comparison
         
-        Format the response in a clear, structured way.  Y
+        Format the response in a clear, structured way.  
         """
         response = model.generate_content(prompt)
 
@@ -96,6 +96,28 @@ if file1 and file2:
                         file_name="comparison_results.txt",
                         mime="text/plain"
                     )
+
+                    # here is the prompt used
+                    st.markdown("""
+
+                    ### The Prompt to generate the comparison: 
+
+                    Compare and contrast the following two texts:
+        
+                    Text 1:
+                    {text1[:2000]}  # Limiting text length to avoid token limits
+                    
+                    Text 2:
+                    {text2[:2000]}
+                    
+                    Please provide:
+                    1. Main similarities between the documents
+                    2. Key differences
+                    3. Unique points in each document
+                    4. Overall summary of comparison
+                    
+                    Format the response in a clear, structured way.  
+                    """)
     else:
         st.error("Error processing one or both PDFs. Please try again.")
 
