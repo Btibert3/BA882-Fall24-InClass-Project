@@ -71,31 +71,31 @@ file1 = st.sidebar.file_uploader("Upload first PDF", type=['pdf'], accept_multip
 file2 = st.sidebar.file_uploader("Upload second PDF", type=['pdf'], accept_multiple_files=False)
 
 if file1 and file2:
+    st.success("PDFs processed successfully!  Click the Button below to start the analysis.")
     with st.spinner("Processing PDFs..."):
         # Extract text from PDFs
         text1 = extract_text_from_pdf(file1)
         text2 = extract_text_from_pdf(file2)
         
-        if text1 and text2:
-            st.success("PDFs processed successfully!")
-            
-            if st.button("Compare Documents"):
-                with st.spinner("Analyzing documents..."):
-                    comparison_result = compare_texts(text1, text2)
+    if text1 and text2:
+        if st.button("Compare Documents"):
+            with st.spinner("Analyzing documents..."):
+                comparison_result = compare_texts(text1, text2)
+                
+                if comparison_result:
+                    st.subheader("Comparison Results")
+                    st.markdown(comparison_result)
                     
-                    if comparison_result:
-                        st.subheader("Comparison Results")
-                        st.markdown(comparison_result)
-                        
-                        # Option to download comparison
-                        st.download_button(
-                            label="Download Comparison Results",
-                            data=comparison_result,
-                            file_name="comparison_results.txt",
-                            mime="text/plain"
-                        )
-        else:
-            st.error("Error processing one or both PDFs. Please try again.")
+                    # Option to download comparison
+                    st.download_button(
+                        label="Download Comparison Results",
+                        data=comparison_result,
+                        file_name="comparison_results.txt",
+                        mime="text/plain"
+                    )
+    else:
+        st.error("Error processing one or both PDFs. Please try again.")
+
 
 
 
