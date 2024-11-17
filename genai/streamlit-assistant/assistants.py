@@ -33,7 +33,7 @@ vertexai.init(project=GCP_PROJECT, location=GCP_REGION)
 
 # that chat model
 model = GenerativeModel("gemini-1.5-flash-002")
-chat_session = model.start_chat()
+chat_session = model.start_chat(response_validation=False)
 
 # helper to grab the response
 def get_chat_response(chat: ChatSession, prompt: str) -> str:
