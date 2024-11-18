@@ -22,3 +22,15 @@ gcloud functions deploy genai-schema-setup \
     --region us-central1 \
     --allow-unauthenticated \
     --memory 512MB 
+
+gcloud functions deploy genai-schema-collector \
+    --gen2 \
+    --runtime python311 \
+    --trigger-http \
+    --entry-point task \
+    --source ./functions/collector \
+    --stage-bucket btibert-ba882-fall24-functions \
+    --service-account etl-pipeline@btibert-ba882-fall24.iam.gserviceaccount.com \
+    --region us-central1 \
+    --allow-unauthenticated \
+    --memory 512MB 
