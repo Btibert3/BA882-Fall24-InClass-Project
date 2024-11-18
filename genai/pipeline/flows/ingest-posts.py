@@ -48,12 +48,17 @@ def job():
     post_ids = collect_result.get("post_ids")
     print(f"Posts to process: {len(post_ids)}")
 
-    processed_posts = []
+    if len(post_ids) > 0:
+        print("starting map operation over the identifed posts")
+        processed_posts = []
 
-    for post_id in post_ids:
-        processed_posts.append(ingest.submit({"post_id": post_id}))
+        for post_id in post_ids:
+            processed_posts.append(ingest.submit({"post_id": post_id}))
 
-    wait(processed_posts)
+        wait(processed_posts)
+    
+    else:
+        print("No posts to complete, exiting now.")
 
 # the job
 if __name__ == "__main__":
