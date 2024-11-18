@@ -92,7 +92,8 @@ def task(request):
                 'title': post_data['title'],
                 'published_timestamp': post_data['timestamp'],
                 'chunk_index': cid,
-                'post_id': id
+                'post_id': id,
+                'chunk_text': chunk_text
             }
         }
         chunk_docs.append(chunk_doc)
