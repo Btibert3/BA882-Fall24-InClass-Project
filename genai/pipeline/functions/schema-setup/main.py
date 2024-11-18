@@ -14,7 +14,7 @@ vector_secret = "pinecone"
 db = 'awsblogs'
 schema = "genai"
 db_schema = f"{db}.{schema}"
-vector_index = "post_content"
+vector_index = "post-content"
 
 
 @functions_framework.http
