@@ -17,10 +17,10 @@ project_id = 'btibert-ba882-fall24'
 region_id = 'us-central1'
 secret_id = 'mother_duck'   #<---------- this is the name of the secret you created
 version_id = 'latest'
-vector_secret = "post-content"
+vector_secret = "pinecone"
 
 # db setup
-vector_index = "posts"
+vector_index = "post-content"
 
 vertexai.init(project=project_id, location=region_id)
 
