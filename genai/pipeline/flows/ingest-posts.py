@@ -37,6 +37,7 @@ def ingest(payload):
 
 
 # job that uses the threadpool to process posts in blocks, as they don't have any dependency
+# below we dfine the number of workers at 5
 @flow(task_runner=ThreadPoolTaskRunner(max_workers=5), log_prints=True)
 def job():
 
@@ -49,7 +50,7 @@ def job():
 
     processed_posts = []
 
-    for post_id in post_ids[:10]:
+    for post_id in post_ids:
         processed_posts.append(ingest.submit({"post_id": post_id}))
 
     wait(processed_posts)

@@ -5,7 +5,7 @@ if __name__ == "__main__":
         source="https://github.com/Btibert3/BA882-Fall24-InClass-Project.git",
         entrypoint="genai/pipeline/flows/ingest-posts.py:job",
     ).deploy(
-        name="aws-blogs-genai-ingestion",
+        name="genai-post-ingestion",
         work_pool_name="brock-pool1",
         job_variables={"env": {"BROCK": "loves-to-code"},
                        "pip_packages": ["pandas", "requests"]},
