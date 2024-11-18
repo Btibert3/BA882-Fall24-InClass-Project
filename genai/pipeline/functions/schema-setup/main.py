@@ -42,8 +42,9 @@ def task(request):
     raw_tbl_name = f"{db_schema}.pinecone_posts"
     raw_tbl_sql = f"""
     CREATE TABLE IF NOT EXISTS {raw_tbl_name} (
-        id VARCHAR PRIMARY KEY
+        id VARCHAR PRIMARY KEY,
         parsed_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
     """
     print(f"{raw_tbl_sql}")
     md.sql(raw_tbl_sql)

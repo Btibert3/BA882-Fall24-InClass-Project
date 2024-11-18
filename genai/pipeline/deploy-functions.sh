@@ -16,9 +16,9 @@ gcloud functions deploy genai-schema-setup \
     --runtime python311 \
     --trigger-http \
     --entry-point task \
-    --source ./functions/schema \
+    --source ./functions/schema-setup \
     --stage-bucket btibert-ba882-fall24-functions \
     --service-account etl-pipeline@btibert-ba882-fall24.iam.gserviceaccount.com \
     --region us-central1 \
     --allow-unauthenticated \
-    --memory 256MB 
+    --memory 512MB 
