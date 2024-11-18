@@ -1,0 +1,6 @@
+vertexai
+google-cloud-aiplatform
+llama-index
+langchain
+duckb
+google-cloud-secret-manager
