@@ -1,16 +1,20 @@
 import functions_framework
 from google.cloud import secretmanager
 import duckdb
+# pinecone serverless
+from pinecone import Pinecone, ServerlessSpec
 
 # settings
 project_id = 'btibert-ba882-fall24'
 secret_id = 'mother_duck'   #<---------- this is the name of the secret you created
 version_id = 'latest'
+vector_secret = "pinecone"
 
 # db setup
 db = 'awsblogs'
 schema = "genai"
 db_schema = f"{db}.{schema}"
+vector_index = "posts"
 
 
 @functions_framework.http
@@ -49,6 +53,28 @@ def task(request):
     print(f"{raw_tbl_sql}")
     md.sql(raw_tbl_sql)
 
+
+    ##################################################### vectordb 
+
+    # Build the resource name of the secret version
+    vector_name = f"projects/{project_id}/secrets/{vector_secret}/versions/{version_id}"
+
+    # Access the secret version
+    response = sm.access_secret_version(request={"name": vector_name})
+    pinecone_token = response.payload.data.decode("UTF-8")
+
+    pc = Pinecone(api_key=pinecone_token)
+
+    if not pc.has_index(vector_index):
+        pc.create_index(
+            name=vector_index,
+            dimension=768,
+            metric="cosine",
+            spec=ServerlessSpec(
+                cloud='aws', # gcp <- not part of free
+                region='us-east-1' # us-central1 <- not part of free
+            )
+        )
     
     ## wrap up
     return {}, 200
