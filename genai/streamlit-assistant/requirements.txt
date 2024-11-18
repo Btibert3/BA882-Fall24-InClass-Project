@@ -1,0 +1,6 @@
+streamlit 
+vertexai
+google-cloud-aiplatform
+llama-index
+langchain
+PyPDF2
