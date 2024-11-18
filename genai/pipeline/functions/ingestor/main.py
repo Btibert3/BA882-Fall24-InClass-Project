@@ -17,7 +17,7 @@ project_id = 'btibert-ba882-fall24'
 region_id = 'us-central1'
 secret_id = 'mother_duck'   #<---------- this is the name of the secret you created
 version_id = 'latest'
-vector_secret = "pinecone"
+vector_secret = "post_content"
 
 # db setup
 vector_index = "posts"
