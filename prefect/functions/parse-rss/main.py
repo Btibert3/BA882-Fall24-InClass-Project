@@ -236,6 +236,8 @@ def task(request):
     links_df['ingest_timestamp'] = ingest_timestamp
     links_df['job_id'] = job_id
 
+    links_df = links_df.dropna()
+
     # write to gcs
     links_fpath = gcs_base + "links.parquet"
     links_df.to_parquet(links_fpath, engine='pyarrow')
