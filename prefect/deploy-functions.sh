@@ -74,6 +74,6 @@ gcloud functions deploy dev-load-rss \
     --service-account etl-pipeline@btibert-ba882-fall24.iam.gserviceaccount.com \
     --region us-central1 \
     --allow-unauthenticated \
-    --memory 512MB  \
+    --memory 1GB  \
     --timeout 60s 
 
