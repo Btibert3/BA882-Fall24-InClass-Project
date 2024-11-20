@@ -46,19 +46,19 @@ classifications = cf.run(
 )
 
 
-project_id = "btibert-ba882-fall24"   
-region_id = "us-central1"
-vertexai.init(project=project_id, location=region_id, credentials=credentials)
+# project_id = "btibert-ba882-fall24"   
+# region_id = "us-central1"
+# vertexai.init(project=project_id, location=region_id, credentials=credentials)
 
-# model = GenerativeModel("gemini-1.5-pro-001")
-
-
+# # model = GenerativeModel("gemini-1.5-pro-001")
 
 
 
 
-import controlflow as cf
 
-agent = cf.Agent(model=model)
+
+# import controlflow as cf
+
+# agent = cf.Agent(model=model)
 
 
