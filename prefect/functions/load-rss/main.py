@@ -130,6 +130,7 @@ def task(request):
     # read in from gcs
     links_path = request_json.get('links')
     links_df = pd.read_parquet(links_path)
+    links_df = links_df.dropna(subset="href")
 
     # table logic
     raw_tbl_name = f"{raw_db_schema}.links"
