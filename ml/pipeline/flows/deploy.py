@@ -9,7 +9,7 @@ if __name__ == "__main__":
         name="mlops-train-model",
         work_pool_name="brock-pool1",
         job_variables={"env": {"BROCK": "loves-to-code"},
-                       "pip_packages": ["pandas", "requests"]},
+                       "pip_packages": ["pandas==2.2.3", "requests==2.32.3"]},
         tags=["prod"],
         description="Pipeline to train a model and log metrics and parameters for a training job",
         version="1.0.0",
