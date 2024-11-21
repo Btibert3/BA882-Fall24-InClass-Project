@@ -8,7 +8,7 @@ if __name__ == "__main__":
         name="genai-post-ingestion",
         work_pool_name="brock-pool1",
         job_variables={"env": {"BROCK": "loves-to-code"},
-                       "pip_packages": ["pandas", "requests"]},
+                       "pip_packages": ["pandas==2.2.3", "requests==2.32.3"]},
         cron="15 1 * * *",
         tags=["prod"],
         description="The pipeline to grab unprocessed posts and process to store in the vector database",
