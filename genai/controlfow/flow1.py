@@ -1,6 +1,7 @@
 # an agent that fires on an event to prefect -- summarizes a public url
 
 import controlflow as cf
+from prefect import flow, task
 
 import vertexai
 from vertexai.generative_models import GenerativeModel
@@ -23,5 +24,11 @@ def my_flow(x=5):
     z = cf.run('Multiply the result by 2', result_type=int)
     return z
 
-print(my_flow(10))
+@flow
+def agent_example1():
+    resp = my_flow()
+    print(resp)
 
+# the job
+if __name__ == "__main__":
+    agent_example1()
