@@ -1,4 +1,4 @@
-# an agent that fires on an event to prefect -- summarizes a public url
+# an agent that fires on an event to prefect 
 
 import controlflow as cf
 from prefect import flow, task
