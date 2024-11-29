@@ -21,7 +21,9 @@ credentials = Credentials.from_service_account_info(service_account_json_str)
 
 from langchain_google_vertexai import ChatVertexAI
 # model = ChatVertexAI(model="gemini-1.5-flash", credentials=credentials, )  # can set temperature
-model = ChatVertexAI(model="gemini-1.5-pro-001", credentials=credentials, )  # can set temperature
+# model = ChatVertexAI(model="gemini-1.5-pro-001", credentials=credentials, )  # can set temperature
+model = ChatVertexAI(model="gemini-1.0-pro", credentials=credentials, )  # can set temperature
+
 
 cf.defaults.model = model
 
@@ -237,6 +239,10 @@ print(result)
 import sys
 from controlflow import Agent, Task, flow
 
+model = ChatVertexAI(model="gemini-1.5-pro-001", credentials=credentials, )  # can set temperature
+# model = ChatVertexAI(model="gemini-1.0-pro", credentials=credentials, )  # can set temperature
+cf.defaults.model = model
+
 jerry = Agent(
     name="Jerry",
     description="The observational comedian and natural leader.",
@@ -310,10 +316,16 @@ def demo(topic: str):
     )
     task.run()
 
-topic = "twitter renamed to X"
+topic = "instant replay in Major league baseball"
 results = demo(topic)
 
 ## starts to work, but chokes on requests per minute quota (5, even with gemini and flash)
+## lesser model pro 1, doesn't flip from Jerry, but odd that I just tried twice with 1.5 pro and no quota limit but likely inside tolerance
+## add odd it shows 5 on dashboard but 300 https://cloud.google.com/vertex-ai/generative-ai/docs/quotas
+## submitted request to 100, not even 300, described why, odd I also had to give a phone number
+## it creates a GCP case -> which you can see on the tab, and it was approved pretty quickly
+## worth noting is that the logs on cloud align to what I would have expected, but not shown in other examples above.
+## still dont quite understanding where the prompt is being logged, I expected to see details on how this is being orchesterated
 
 # if __name__ == "__main__":
 #     if len(sys.argv) > 1:
@@ -325,3 +337,82 @@ results = demo(topic)
 #     demo(topic=topic)
 
 
+###################################### call routing example
+## 
+
+import random
+import controlflow as cf
+
+DEPARTMENTS = [
+    "Sales",
+    "Support",
+    "Billing",
+    "Returns",
+]
+
+@cf.flow
+def routing_flow():
+    target_department = random.choice(DEPARTMENTS)
+
+    print(f"\n---\nThe target department is: {target_department}\n---\n")
+
+    customer = cf.Agent(
+        name="Customer",
+        instructions=f"""
+            You are training customer reps by pretending to be a customer
+            calling into a call center. You need to be routed to the
+            {target_department} department. Come up with a good backstory.
+            """,
+    )
+
+    trainee = cf.Agent(
+        name="Trainee",
+        instructions=""",
+            You are a trainee customer service representative. You need to
+            listen to the customer's story and route them to the correct
+            department. Note that the customer is another agent training you.
+            """,
+    )
+
+    with cf.Task(
+        "Route the customer to the correct department.",
+        agents=[trainee],
+        result_type=DEPARTMENTS,
+    ) as main_task:
+        
+        while main_task.is_incomplete():
+            
+            cf.run(
+                "Talk to the trainee.",
+                instructions=(
+                    "Post a message to talk. In order to help the trainee "
+                    "learn, don't be direct about the department you want. "
+                    "Instead, share a story that will let them practice. "
+                    "After you speak, mark this task as complete."
+                ),
+                agents=[customer],
+                result_type=None
+            )
+
+            cf.run(
+                "Talk to the customer.",
+                instructions=(
+                    "Post a message to talk. Ask questions to learn more "
+                    "about the customer. After you speak, mark this task as "
+                    "complete. When you have enough information, use the main "
+                    "task tool to route the customer to the correct department."
+                ),
+                agents=[trainee],
+                result_type=None,
+                tools=[main_task.get_success_tool()]
+            )
+    
+    if main_task.result == target_department:
+        print("Success! The customer was routed to the correct department.")
+    else:
+        print(f"Failed. The customer was routed to the wrong department. "
+              f"The correct department was {target_department}.")
+
+
+## works after the quota increase, but saw the following
+## some empty LLM calls, repeated mark of tasks successful, seemingly a restart of the convo, and end.  
