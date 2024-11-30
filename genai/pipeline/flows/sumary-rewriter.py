@@ -96,13 +96,13 @@ def summary_eval(body:str):
     return (summary, evals)
 
 
+############################## start to test logic for pipeline
+
 posts_list = posts.to_dict(orient="records")
 
 entry = 1
 
 tmp = summary_eval(body=posts_list[entry].get('content_text'))
-
-
 
 vote = cf.run("Vote for the best summary, you must choose one of the two summaries", 
     agents=[judge], 
@@ -111,3 +111,22 @@ vote = cf.run("Vote for the best summary, you must choose one of the two summari
                  summary2=posts_list[entry].get('summary')),
     result_type=['summary1', 'summary2']
     )
+
+
+with cf.Flow():
+    votes = []
+    for entry in posts_list:
+        body_text = entry.get('content_text')
+        output = summary_eval(body=body_text)
+        vote = cf.run("Vote for the best summary, you must choose one of the two summaries", 
+            agents=[judge], 
+            context=dict(body=body_text, 
+                        summary1=output[0], 
+                        summary2=entry.get('summary')),
+            result_type=['summary1', 'summary2']
+        )
+        votes.append(vote)
+
+
+votes
+        
