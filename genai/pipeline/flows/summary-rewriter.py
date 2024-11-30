@@ -111,9 +111,8 @@ def summary_eval(body:str):
 #     result_type=['summary1', 'summary2']
 #     )
 
-
-# the job
-if __name__ == "__main__":
+@flow(log_prints=True)
+def summarizer_flow():
 
     # if len == 0
     if len(posts) == 0:
@@ -127,6 +126,7 @@ if __name__ == "__main__":
     with cf.Flow():
         votes = []
         for entry in posts_list:
+            print(f"processing post id: {entry.get('id')}")
             body_text = entry.get('content_text')
             output = summary_eval(body=body_text)
             vote = cf.run("Vote for the best summary, you must choose one of the two summaries", 
@@ -137,5 +137,10 @@ if __name__ == "__main__":
                 result_type=['summary1', 'summary2']
             )
             votes.append(vote)
+
+# the job
+if __name__ == "__main__":
+    summarizer_flow()
+
 
         
