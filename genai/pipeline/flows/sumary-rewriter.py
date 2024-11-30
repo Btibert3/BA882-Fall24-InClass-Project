@@ -28,7 +28,6 @@ sql = "select * from awsblogs.stage.posts where strftime(published, '%Y-%m-%d') 
 posts = md.sql(sql).df()
 
 
-
 # create the Agents
 writer = cf.Agent(
     name="Blog Post Summarizer",
@@ -98,35 +97,45 @@ def summary_eval(body:str):
 
 ############################## start to test logic for pipeline
 
-posts_list = posts.to_dict(orient="records")
-
-entry = 1
-
-tmp = summary_eval(body=posts_list[entry].get('content_text'))
-
-vote = cf.run("Vote for the best summary, you must choose one of the two summaries", 
-    agents=[judge], 
-    context=dict(body=txt, 
-                 summary1=tmp[entry], 
-                 summary2=posts_list[entry].get('summary')),
-    result_type=['summary1', 'summary2']
-    )
 
 
-with cf.Flow():
-    votes = []
-    for entry in posts_list:
-        body_text = entry.get('content_text')
-        output = summary_eval(body=body_text)
-        vote = cf.run("Vote for the best summary, you must choose one of the two summaries", 
-            agents=[judge], 
-            context=dict(body=body_text, 
-                        summary1=output[0], 
-                        summary2=entry.get('summary')),
-            result_type=['summary1', 'summary2']
-        )
-        votes.append(vote)
+# entry = 1
+
+# tmp = summary_eval(body=posts_list[entry].get('content_text'))
+
+# vote = cf.run("Vote for the best summary, you must choose one of the two summaries", 
+#     agents=[judge], 
+#     context=dict(body=txt, 
+#                  summary1=tmp[entry], 
+#                  summary2=posts_list[entry].get('summary')),
+#     result_type=['summary1', 'summary2']
+#     )
 
 
-votes
+# the job
+if __name__ == "__main__":
+
+    # if len == 0
+    if len(posts) == 0:
+        print("No posts to process")
+        return {}
+    
+    # flatten to a list of dictionaries
+    posts_list = posts.to_dict(orient="records")
+
+    # process records
+    with cf.Flow():
+        votes = []
+        for entry in posts_list:
+            body_text = entry.get('content_text')
+            output = summary_eval(body=body_text)
+            vote = cf.run("Vote for the best summary, you must choose one of the two summaries", 
+                agents=[judge], 
+                context=dict(body=body_text, 
+                            summary1=output[0], 
+                            summary2=entry.get('summary')),
+                result_type=['summary1', 'summary2']
+            )
+            votes.append(vote)
+
         
