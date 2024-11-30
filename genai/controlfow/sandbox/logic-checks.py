@@ -16,7 +16,19 @@ credentials = Credentials.from_service_account_info(service_account_json_str)
 model = ChatVertexAI(model="gemini-1.5-pro-001", credentials=credentials)
 cf.defaults.model = model
 
-############################################ Example 1: 
+############################################ Example 1: summary rewriter
+
+
+
+
+
+############################################ Example 2: categorizer
+
+# NOTES:  use variable for MD within prefect
+#         get yesterday, if posts, new summary, LLM judge compare, write both to MD with winner flag
+#         from list of categories (5+), pick categories for post, check agreement
+#         frame both from Marketing team asking data team for help 
+
 
 
 
