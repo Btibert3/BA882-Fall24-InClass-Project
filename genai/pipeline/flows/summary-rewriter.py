@@ -26,6 +26,7 @@ md = duckdb.connect(f'md:?motherduck_token={md_token}')
 # get the posts from the last day
 sql = "select * from awsblogs.stage.posts where strftime(published, '%Y-%m-%d') = strftime(CURRENT_DATE - INTERVAL 1 DAY, '%Y-%m-%d');"
 posts = md.sql(sql).df()
+print(f"number of posts found: {len(posts)}")
 
 
 # create the Agents
@@ -95,23 +96,7 @@ def summary_eval(body:str):
     return (summary, evals)
 
 
-############################## start to test logic for pipeline
-
-
-
-# entry = 1
-
-# tmp = summary_eval(body=posts_list[entry].get('content_text'))
-
-# vote = cf.run("Vote for the best summary, you must choose one of the two summaries", 
-#     agents=[judge], 
-#     context=dict(body=txt, 
-#                  summary1=tmp[entry], 
-#                  summary2=posts_list[entry].get('summary')),
-#     result_type=['summary1', 'summary2']
-#     )
-
-@flow(log_prints=True)
+@cf.flow
 def summarizer_flow():
 
     # if len == 0
