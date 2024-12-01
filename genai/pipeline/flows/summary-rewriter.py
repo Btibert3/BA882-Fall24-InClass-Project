@@ -24,7 +24,7 @@ md_token = Variable.get("md_token").get("token")
 md = duckdb.connect(f'md:?motherduck_token={md_token}') 
 
 # get the posts from the last day
-sql = "select * from awsblogs.stage.posts where strftime(published, '%Y-%m-%d') = strftime(CURRENT_DATE - INTERVAL 2 DAY, '%Y-%m-%d');"
+sql = "select * from awsblogs.stage.posts where strftime(published, '%Y-%m-%d') = strftime(CURRENT_DATE - INTERVAL 1 DAY, '%Y-%m-%d');"
 posts = md.sql(sql).df()
 print(f"number of posts found: {len(posts)}")
 
