@@ -1,6 +1,11 @@
 streamlit 
+duckdb
+pinecone
 vertexai
 google-cloud-aiplatform
-llama-index
-langchain
-PyPDF2
+google-cloud-secret-manager
+networkx
+matplotlib
+# llama-index
+# langchain
+# PyPDF2

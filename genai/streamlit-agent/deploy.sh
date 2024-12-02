@@ -6,21 +6,21 @@ echo "======================================================"
 echo "build (no cache)"
 echo "======================================================"
 
-docker build --no-cache -t gcr.io/btibert-ba882-fall24/streamlit-genai-apps .
+docker build --no-cache -t gcr.io/btibert-ba882-fall24/streamlit-rag-app .
 
 echo "======================================================"
 echo "push"
 echo "======================================================"
 
-docker push gcr.io/btibert-ba882-fall24/streamlit-genai-apps
+docker push gcr.io/btibert-ba882-fall24/streamlit-rag-app
 
 echo "======================================================"
 echo "deploy run"
 echo "======================================================"
 
 
-gcloud run deploy streamlit-genai-apps \
-    --image gcr.io/btibert-ba882-fall24/streamlit-genai-apps \
+gcloud run deploy streamlit-rag-app \
+    --image gcr.io/btibert-ba882-fall24/streamlit-rag-app \
     --platform managed \
     --region us-central1 \
     --allow-unauthenticated \
