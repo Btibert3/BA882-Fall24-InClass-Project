@@ -19,7 +19,7 @@ echo "deploy run"
 echo "======================================================"
 
 
-gcloud run deploy streamlit-rag-app \
+gcloud run deploy streamlit-rag-app \ 
     --image gcr.io/btibert-ba882-fall24/streamlit-rag-app \
     --platform managed \
     --region us-central1 \
